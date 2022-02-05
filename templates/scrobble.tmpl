@@ -1,3 +1,4 @@
+{{ define "scrobble.tmpl" }}
 <!DOCTYPE html>
 <html lang="en">
 	{{ template "head.tmpl" . }}
@@ -5,17 +6,79 @@
 	{{ template "header.tmpl" . }}
 	<main>
 
+	{{ $scrobbleType := .scrobbleType }}
+
 	{{ if .user }}
 	Logged in as {{.user}} <a href="/logout"><button>Log Out</button></a>
     {{end}}
 
-	<h2>Add A Post &gt; Add {{ .scrobbleType }}</h2>
+
+
+	<form method="GET" action="/scrobble">
+
+	{{if .searchResults}}
+
+		<p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type=movie">Add {{ .scrobbleTypeName }}</a> &gt; {{.searchEngine}} Results</p>
+
+		<ul>
+        {{ $scrobbleType := .scrobbleType }}
+		{{range $result := .searchResults}}
+
+			<li>
+				<a href="/scrobble?type={{$scrobbleType}}&item={{$result.GetID}}">{{$result.GetDisplayName}}</a> 
+				<a href="{{$result.GetCanonicalURL}}" target="_blank">(🔍more info)</a>
+			</li>
+
+		{{end}}
+		</ul>
+
+	{{ else if .item}}
+
+		<p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type=movie">Add {{ .scrobbleTypeName }}</a> &gt; {{.item.GetDisplayName}}</p>
+
+		<h3>{{.item.GetDisplayName}}</h3>
+
+		<div class="float-left">
+
+			{{if .item.GetThumbnailURL}}
+				<img class="thumbnail" src="{{.item.GetThumbnailURL}}"/>
+			{{end}}
+
+				
+		</div>
+
+		<div>
+
+		<label>When: </label> <input type="datetime-local" name='datetime'/><br/>
+
+		<label>Rating: (out of 5)</label> <input type="number" name='datetime'/><br/>
+
+		<label>Note/Content: </label> <br>
+		<textarea rows="6" name='content'></textarea>
+
+		<br/>
+		<button type="submit">Preview &gt; &gt;</button>
+		
+		</div>
 
 
 
-	<button type="submit">Next &gt;&gt;</button>
+	{{ else }}
+
+		<h2><a href="/">Add A Post</a> Add {{ .scrobbleTypeName }}</h2>
+
+		<p>Search <b>{{.searchEngine}}</b> for items to scrobble<p>
+
+		<input type="text" name="q" placeholder="{{.scrobblePlaceholder}}">
+
+		<button type="submit">Next &gt;&gt;</button>
+
+	{{end}}
+
+	<input type="hidden" name="type" value="{{.scrobbleType}}"/>
 	</form>
 
 	</main>
 	</body>
 </html>
+{{end}}
