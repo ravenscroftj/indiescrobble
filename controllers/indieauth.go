@@ -50,6 +50,10 @@ func (iam *IndieAuthManager) GetCurrentUser(c *gin.Context) string {
 
 		val, present := tok.Get("user")
 
+		indietok, present := tok.Get("token")
+
+		fmt.Printf("indie token current user: %v", indietok)
+
 		if present {
 			return fmt.Sprintf("%v", val)
 		}else{
@@ -158,6 +162,24 @@ func (iam *IndieAuthManager) saveAuthInfo(w http.ResponseWriter, r *http.Request
 }
 
 
+func (iam *IndieAuthManager) Logout(c *gin.Context) {
+
+	// delete the cookie
+	cookie := &http.Cookie{
+		Name:     "jwt",
+		MaxAge:   -1,
+		Secure:   c.Request.URL.Scheme == "https",
+		HttpOnly: true,
+		Path:     "/",
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	http.SetCookie(c.Writer, cookie)
+	
+	c.Redirect(http.StatusSeeOther, "/")
+
+}
+
 func (iam *IndieAuthManager) IndieAuthLoginPost(c *gin.Context) {
 
 	err := c.Request.ParseForm()
@@ -235,7 +257,17 @@ func (iam *IndieAuthManager) LoginCallbackGet(c *gin.Context) {
 		return
 	}
 
-	profile, err := iam.iac.FetchProfile(i, code)
+
+	// profile, err := iam.iac.FetchProfile(i, code)
+	// if err != nil {
+	// 	c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{
+	// 		"message": err,
+	// 	})
+	// 	return
+	// }
+
+
+	token, _, err := iam.iac.GetToken(i, code)
 	if err != nil {
 		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{
 			"message": err,
@@ -243,7 +275,10 @@ func (iam *IndieAuthManager) LoginCallbackGet(c *gin.Context) {
 		return
 	}
 
-	if err := indieauth.IsValidProfileURL(profile.Me); err != nil {
+	me := token.Extra("me").(string)
+
+
+	if err := indieauth.IsValidProfileURL(me); err != nil {
 		err = fmt.Errorf("invalid 'me': %w", err)
 		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{
 			"message": err,
@@ -257,7 +292,8 @@ func (iam *IndieAuthManager) LoginCallbackGet(c *gin.Context) {
 		jwt.SubjectKey:    config.GetString("indieauth.sessionSubject"),
 		jwt.IssuedAtKey:   time.Now().Unix(),
 		jwt.ExpirationKey: expiration,
-		"user":            profile.Me,
+		"user":            me,
+		"token": token.AccessToken,
 	})
 	if err != nil {
 		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{

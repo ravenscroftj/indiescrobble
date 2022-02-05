@@ -21,14 +21,22 @@ func NewRouter() *gin.Engine {
 
 	router.GET("/health", health.Status)
 
-	router.Use(middlewares.AuthMiddleware())
+	router.Use(middlewares.AuthMiddleware(false))
 
 	router.GET("/", controllers.Index)
 
 	router.Static("/static", config.GetString("server.static_path"))
 
+	// add auth endpoints
+
 	router.POST("/indieauth", iam.IndieAuthLoginPost)
 	router.GET("/auth", iam.LoginCallbackGet)
+	router.GET("/logout", iam.Logout)
+
+	authed := router.Use(middlewares.AuthMiddleware(true))
+
+	// add scrobble endpoints
+	authed.GET("/scrobble", controllers.Scrobble)
 
 
 

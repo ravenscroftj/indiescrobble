@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "head.tmpl" . }}
+	<body>
+	{{ template "header.tmpl" . }}
+	<main>
+
+	{{ if .user }}
+	Logged in as {{.user}} <a href="/logout"><button>Log Out</button></a>
+    {{end}}
+
+	<h2>Add A Post &gt; Add {{ .scrobbleType }}</h2>
+
+
+
+	<button type="submit">Next &gt;&gt;</button>
+	</form>
+
+	</main>
+	</body>
+</html>

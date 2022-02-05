@@ -4,11 +4,25 @@
 	<body>
 	{{ template "header.tmpl" . }}
 	<main>
+
+	{{ if .user }}
+	Logged in as {{.user}} <a href="/logout"><button>Log Out</button></a>
+
+	<h2>Add A Scrobble</h2>
+
+	I want to add a:
+	<form method="GET" action="/scrobble">
+    {{range $type, $label := .scrobbleTypes }}
+    <label><input type="radio" name="type" value="{{ $type }}"/>{{$label}}</label><br/>
+    {{end}}
+
+	<button type="submit">Next &gt;&gt;</button>
+	</form>
+
+	{{else}}
 		<p>Welcome to indiescrobble! IndieScrobble is a <a href="https://micropub.spec.indieweb.org/">MicroPub</a> compliant tool
 	for posting about your watches, reads and scrobbles directly back to your site.</p>
 
-	{{ if index . "user" }}
-	{{else}}
 	<form action="/indieauth" method="POST">
 	<p>
 		<label>Your domain: </label>

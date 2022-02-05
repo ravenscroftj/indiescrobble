@@ -1,21 +1,26 @@
 package middlewares
 
 import (
-	"fmt"
+	"net/http"
 
 	"git.jamesravey.me/ravenscroftj/indiescrobble/controllers"
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(requireValidUser bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// config := config.GetConfig()
 
 		iam := controllers.NewIndieAuthManager()
 		
+		currentUser := iam.GetCurrentUser(c)
 
+		if requireValidUser && (currentUser == "") {
+			c.SetCookie("jwt", "", -1, "/", "", c.Request.URL.Scheme == "https", true)
+			c.Redirect(http.StatusSeeOther, "/")
+		}
 
-		fmt.Printf("Current user: %v\n", iam.GetCurrentUser(c))
+		c.Set("user", currentUser)
 
 		// reqKey := c.Request.Header.Get("X-Auth-Key")
 		// reqSecret := c.Request.Header.Get("X-Auth-Secret")
