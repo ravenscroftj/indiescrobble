@@ -14,11 +14,24 @@ var config *viper.Viper
 func Init(env string) {
 	var err error
 	config = viper.New()
+
+	config.SetDefault("indieauth.clientName", "https://indiescrobble.club")
+	config.SetDefault("indieauth.redirectURL", "http://localhost:3000/auth")
+	config.SetDefault("indieauth.oauthSubject", "IndieScrobble OAuth Client")
+	config.SetDefault("indieauth.oauthCookieName","indiescrobble-oauth")
+	config.SetDefault("indieauth.sessionSubject", "IndieScrobble Session")
+
 	config.SetConfigType("yaml")
 	config.SetConfigName(env)
 	config.AddConfigPath("../config/")
 	config.AddConfigPath("config/")
+
 	err = config.ReadInConfig()
+
+	if config.GetString("jwt.signKey") == ""{
+		log.Fatal("You must set a JWT sign key (jwt.signKey in config yaml)")
+	}
+
 
 	config.BindEnv("server.port","PORT")
 	

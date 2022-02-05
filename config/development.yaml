@@ -2,3 +2,7 @@ server:
   port: ":8081"
 
   static_path: ./static
+
+jwt:
+  signKey: "profiteroles"
+  verifyKey: "topSecret"

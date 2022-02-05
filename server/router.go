@@ -16,14 +16,22 @@ func NewRouter() *gin.Engine {
 
 	health := new(controllers.HealthController)
 
+	iam := controllers.NewIndieAuthManager()
+
+
 	router.GET("/health", health.Status)
+
+	router.Use(middlewares.AuthMiddleware())
 
 	router.GET("/", controllers.Index)
 
 	router.Static("/static", config.GetString("server.static_path"))
 
+	router.POST("/indieauth", iam.IndieAuthLoginPost)
+	router.GET("/auth", iam.LoginCallbackGet)
 
-	router.Use(middlewares.AuthMiddleware())
+
+
 
 	// v1 := router.Group("v1")
 	// {

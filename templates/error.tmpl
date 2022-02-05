@@ -1,16 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-	<link rel="stylesheet" href="/static/css/simple-v1.css" />
-	</head>
+	{{ template "head.tmpl" . }}
 	<body>
-	<header>
-	<h1>
-		IndieScrobble
-	</h1>
-	</header>
+	{{ template "header.tmpl" . }}
 	<main>
-		<p>{{ .message }}</p>
+	<h2>Error</h2>
+	{{ .message }}
 	</main>
 	</body>
 </html>
