@@ -1,0 +1,54 @@
+{{ define "preview.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "head.tmpl" . }}
+	<body>
+	{{ template "header.tmpl" . }}
+	<main>
+
+	{{ $scrobbleType := .scrobbleType }}
+
+	{{ if .user }}
+	Logged in as {{.user}} <a href="/logout"><button>Log Out</button></a>
+    {{end}}
+
+
+    <form method="POST" action="/scrobble/preview">
+
+    <p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type=movie">Add {{ .scrobbleTypeName }}</a> &gt; {{.item.GetDisplayName}}</p>
+
+    <h3>Preview Post: {{.item.GetDisplayName}}</h3>
+
+    <div class="float-left">
+
+        {{if .item.GetThumbnailURL}}
+            <img class="thumbnail" src="{{.item.GetThumbnailURL}}"/>
+        {{end}}
+
+            
+    </div>
+
+    <div>
+
+    <label>When: <b>{{.when}}</b></label> <input type="hidden" name="when" value="{{.when}}" /><br/>
+
+    <label>Rating: (out of 5)</label> <b>{{.rating}}</b> <input type="hidden" name="rating" value="{{.rating}}"/> <br/>
+
+    <label>Note/Content: </label> <br>
+    <pre>{{.content}}</pre>
+    <input type="hidden" name="content" value="{{.content}}"/>
+
+    <br/>
+    <button type="submit">Submit Post &gt; &gt;</button>
+    
+    </div>
+
+    </form>
+
+
+
+
+	</main>
+	</body>
+</html>
+{{end}}

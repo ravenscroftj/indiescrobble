@@ -21,12 +21,19 @@ func Init(env string) {
 	config.SetDefault("indieauth.oauthCookieName","indiescrobble-oauth")
 	config.SetDefault("indieauth.sessionSubject", "IndieScrobble Session")
 
+	config.SetDefault("server.database.driver", "sqlite")
+	config.SetDefault("server.database.dsn", "indiescrobble.db")
+
 	config.SetConfigType("yaml")
 	config.SetConfigName(env)
 	config.AddConfigPath("../config/")
 	config.AddConfigPath("config/")
 
 	err = config.ReadInConfig()
+
+	if err != nil {
+		log.Fatal("error on parsing configuration file")
+	}
 
 	if config.GetString("jwt.signKey") == ""{
 		log.Fatal("You must set a JWT sign key (jwt.signKey in config yaml)")
@@ -35,9 +42,7 @@ func Init(env string) {
 
 	config.BindEnv("server.port","PORT")
 	
-	if err != nil {
-		log.Fatal("error on parsing configuration file")
-	}
+
 }
 
 func relativePath(basedir string, path *string) {

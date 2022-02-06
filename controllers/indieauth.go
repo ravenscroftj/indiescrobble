@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"git.jamesravey.me/ravenscroftj/indiescrobble/config"
+	"git.jamesravey.me/ravenscroftj/indiescrobble/models"
 	"github.com/gin-gonic/gin"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/hacdias/indieauth"
@@ -34,31 +35,35 @@ func NewIndieAuthManager() *IndieAuthManager{
 	return iam
 }
 
-func (iam *IndieAuthManager) GetCurrentUser(c *gin.Context) string {
+func (iam *IndieAuthManager) GetCurrentUser(c *gin.Context) *models.BaseUser {
 
 	jwt, err := c.Cookie("jwt")
 
 	if err != nil {
-		return ""
+		return nil
 	}else{
 		tok, err := iam.jwtAuth.Decode(jwt)
 
 		if err != nil{
 			log.Printf("Failed to decode jwt: %v", err)
-			return ""
+			return nil
 		}
 
-		val, present := tok.Get("user")
+		me, present := tok.Get("user")
+
+		if !present{
+			return nil
+		}
 
 		indietok, present := tok.Get("token")
 
-		fmt.Printf("indie token current user: %v", indietok)
-
-		if present {
-			return fmt.Sprintf("%v", val)
-		}else{
-			return ""
+		if !present{
+			return nil
 		}
+
+		user := models.BaseUser{Me:  me.(string), Token: indietok.(string)}
+
+		return &user
 
 	}
 
@@ -176,6 +181,7 @@ func (iam *IndieAuthManager) Logout(c *gin.Context) {
 
 	http.SetCookie(c.Writer, cookie)
 	
+	// redirect back to index
 	c.Redirect(http.StatusSeeOther, "/")
 
 }

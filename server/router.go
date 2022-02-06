@@ -37,6 +37,7 @@ func NewRouter() *gin.Engine {
 
 	// add scrobble endpoints
 	authed.GET("/scrobble", controllers.Scrobble)
+	authed.POST("/scrobble/preview", controllers.PreviewScrobble)
 
 
 
