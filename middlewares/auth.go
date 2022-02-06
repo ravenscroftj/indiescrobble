@@ -15,7 +15,7 @@ func AuthMiddleware(requireValidUser bool) gin.HandlerFunc {
 		
 		currentUser := iam.GetCurrentUser(c)
 
-		if requireValidUser && (currentUser == "") {
+		if requireValidUser && (currentUser == nil) {
 			c.SetCookie("jwt", "", -1, "/", "", c.Request.URL.Scheme == "https", true)
 			c.Redirect(http.StatusSeeOther, "/")
 		}
