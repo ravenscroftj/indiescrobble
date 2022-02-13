@@ -5,9 +5,10 @@ import (
 	"git.jamesravey.me/ravenscroftj/indiescrobble/controllers"
 	"git.jamesravey.me/ravenscroftj/indiescrobble/middlewares"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func NewRouter() *gin.Engine {
+func NewRouter(db *gorm.DB) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -16,12 +17,11 @@ func NewRouter() *gin.Engine {
 
 	health := new(controllers.HealthController)
 
-	iam := controllers.NewIndieAuthManager()
-
+	iam := controllers.NewIndieAuthManager(db)
 
 	router.GET("/health", health.Status)
 
-	router.Use(middlewares.AuthMiddleware(false))
+	router.Use(middlewares.AuthMiddleware(false, iam))
 
 	router.GET("/", controllers.Index)
 
@@ -33,13 +33,11 @@ func NewRouter() *gin.Engine {
 	router.GET("/auth", iam.LoginCallbackGet)
 	router.GET("/logout", iam.Logout)
 
-	authed := router.Use(middlewares.AuthMiddleware(true))
+	authed := router.Use(middlewares.AuthMiddleware(true, iam))
 
 	// add scrobble endpoints
 	authed.GET("/scrobble", controllers.Scrobble)
 	authed.POST("/scrobble/preview", controllers.PreviewScrobble)
-
-
 
 	// v1 := router.Group("v1")
 	// {

@@ -15,21 +15,22 @@ import (
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/hacdias/indieauth"
 	"github.com/lestrrat-go/jwx/jwt"
+	"gorm.io/gorm"
 )
 
 type IndieAuthManager struct {
-	iac *indieauth.Client
+	iac     *indieauth.Client
 	jwtAuth *jwtauth.JWTAuth
+	db      *gorm.DB
 }
 
-func NewIndieAuthManager() *IndieAuthManager{
-	
+func NewIndieAuthManager(db *gorm.DB) *IndieAuthManager {
+
 	config := config.GetConfig()
 
 	iam := new(IndieAuthManager)
 	iam.iac = indieauth.NewClient(config.GetString("indieauth.clientName"), config.GetString("indieauth.redirectURL"), nil)
-
-
+	iam.db = db
 	iam.jwtAuth = jwtauth.New("HS256", []byte(config.GetString("jwt.signKey")), []byte(config.GetString("jwt.signKey")))
 
 	return iam
@@ -41,27 +42,52 @@ func (iam *IndieAuthManager) GetCurrentUser(c *gin.Context) *models.BaseUser {
 
 	if err != nil {
 		return nil
-	}else{
+	} else {
 		tok, err := iam.jwtAuth.Decode(jwt)
 
-		if err != nil{
+		if err != nil {
 			log.Printf("Failed to decode jwt: %v", err)
 			return nil
 		}
 
 		me, present := tok.Get("user")
 
-		if !present{
+		if !present {
 			return nil
 		}
 
 		indietok, present := tok.Get("token")
 
-		if !present{
+		if !present {
 			return nil
 		}
 
-		user := models.BaseUser{Me:  me.(string), Token: indietok.(string)}
+		// see if the user exists in the database or set up their profile
+		userRecord := models.User{}
+		result := iam.db.First(&userRecord, models.User{Me: me.(string)})
+
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				log.Printf("Create new user profile for user %v\n", me)
+
+				// create user record for current user
+				userRecord = models.User{Me: me.(string)}
+				userRecord.GenerateRandomKey()
+				result := iam.db.Create(&userRecord)
+
+				if result.Error != nil {
+					log.Printf("Failed to create user record in db: %v", result.Error)
+					return nil
+				}
+
+			} else {
+				log.Printf("Failed to get user from db: %v\n", result.Error)
+				return nil
+			}
+
+		}
+
+		user := models.BaseUser{Me: me.(string), Token: indietok.(string), UserRecord: &userRecord}
 
 		return &user
 
@@ -70,7 +96,6 @@ func (iam *IndieAuthManager) GetCurrentUser(c *gin.Context) *models.BaseUser {
 }
 
 func (iam *IndieAuthManager) getInformation(c *gin.Context) (*indieauth.AuthInfo, string, error) {
-
 
 	config := config.GetConfig()
 
@@ -166,7 +191,6 @@ func (iam *IndieAuthManager) saveAuthInfo(w http.ResponseWriter, r *http.Request
 	return nil
 }
 
-
 func (iam *IndieAuthManager) Logout(c *gin.Context) {
 
 	// delete the cookie
@@ -180,7 +204,7 @@ func (iam *IndieAuthManager) Logout(c *gin.Context) {
 	}
 
 	http.SetCookie(c.Writer, cookie)
-	
+
 	// redirect back to index
 	c.Redirect(http.StatusSeeOther, "/")
 
@@ -190,7 +214,7 @@ func (iam *IndieAuthManager) IndieAuthLoginPost(c *gin.Context) {
 
 	err := c.Request.ParseForm()
 
-	if err != nil{
+	if err != nil {
 		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{
 			"message": err,
 		})
@@ -227,7 +251,6 @@ func (iam *IndieAuthManager) IndieAuthLoginPost(c *gin.Context) {
 
 	fmt.Printf("profile: %v\n", i)
 
-
 	err = iam.saveAuthInfo(c.Writer, c.Request, i)
 	if err != nil {
 		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{
@@ -237,11 +260,10 @@ func (iam *IndieAuthManager) IndieAuthLoginPost(c *gin.Context) {
 	}
 
 	// append me param so the user doesn't have to enter this twice
-	redirect = fmt.Sprintf("%v&me=%v", redirect, url.QueryEscape(i.Me) )
+	redirect = fmt.Sprintf("%v&me=%v", redirect, url.QueryEscape(i.Me))
 
 	c.Redirect(http.StatusSeeOther, redirect)
 }
-
 
 func (iam *IndieAuthManager) LoginCallbackGet(c *gin.Context) {
 
@@ -263,7 +285,6 @@ func (iam *IndieAuthManager) LoginCallbackGet(c *gin.Context) {
 		return
 	}
 
-
 	// profile, err := iam.iac.FetchProfile(i, code)
 	// if err != nil {
 	// 	c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{
@@ -271,7 +292,6 @@ func (iam *IndieAuthManager) LoginCallbackGet(c *gin.Context) {
 	// 	})
 	// 	return
 	// }
-
 
 	token, _, err := iam.iac.GetToken(i, code)
 	if err != nil {
@@ -282,7 +302,6 @@ func (iam *IndieAuthManager) LoginCallbackGet(c *gin.Context) {
 	}
 
 	me := token.Extra("me").(string)
-
 
 	if err := indieauth.IsValidProfileURL(me); err != nil {
 		err = fmt.Errorf("invalid 'me': %w", err)
@@ -299,7 +318,7 @@ func (iam *IndieAuthManager) LoginCallbackGet(c *gin.Context) {
 		jwt.IssuedAtKey:   time.Now().Unix(),
 		jwt.ExpirationKey: expiration,
 		"user":            me,
-		"token": token.AccessToken,
+		"token":           token.AccessToken,
 	})
 	if err != nil {
 		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{

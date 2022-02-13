@@ -6,7 +6,7 @@
 	<main>
 
 	{{ if .user }}
-	Logged in as {{.user}} <a href="/logout"><button>Log Out</button></a>
+	Logged in as {{.user.Me}} <a href="/logout"><button>Log Out</button></a>
 
 	<h2>Add A Scrobble</h2>
 
@@ -32,5 +32,6 @@
 	</form>
 	{{ end }}
 	</main>
+	{{ template "footer.tmpl" . }}
 	</body>
 </html>

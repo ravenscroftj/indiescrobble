@@ -99,7 +99,14 @@ func PreviewScrobble(c *gin.Context){
 
 	discovery := micropub.MicropubDiscoveryService{}
 	
-	discovery.Discover(currentUser.Me, currentUser.Token )
+	config, err := discovery.Discover(currentUser.Me, currentUser.Token )
+
+	if err != nil{
+		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{
+			"message": err,
+		})
+		return
+	}
 
 	c.HTML(http.StatusOK, "preview.tmpl", gin.H{
 		"user": currentUser,
@@ -109,6 +116,7 @@ func PreviewScrobble(c *gin.Context){
 		"when": c.Request.Form.Get("when"),
 		"rating": c.Request.Form.Get("rating"),
 		"content": c.Request.Form.Get("content"),
+		"config": config,
 	})
 
 }

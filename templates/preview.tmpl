@@ -9,7 +9,7 @@
 	{{ $scrobbleType := .scrobbleType }}
 
 	{{ if .user }}
-	Logged in as {{.user}} <a href="/logout"><button>Log Out</button></a>
+	Logged in as {{.user.Me}} <a href="/logout"><button>Log Out</button></a>
     {{end}}
 
 
@@ -38,6 +38,13 @@
     <pre>{{.content}}</pre>
     <input type="hidden" name="content" value="{{.content}}"/>
 
+    {{if .config.SyndicateTargets}}
+        <h3>Syndication Options</h3>
+        {{ range $target := .config.SyndicateTargets}}
+        <label><input type="checkbox" name="mp-syndicate[]" value="{{$target.Uid}}" /> {{$target.Name}}</label><br />
+        {{end}}
+    {{end}}
+
     <br/>
     <button type="submit">Submit Post &gt; &gt;</button>
     
@@ -49,6 +56,7 @@
 
 
 	</main>
+    {{ template "footer.tmpl" . }}
 	</body>
 </html>
 {{end}}

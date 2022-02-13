@@ -7,12 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware(requireValidUser bool) gin.HandlerFunc {
+func AuthMiddleware(requireValidUser bool, iam *controllers.IndieAuthManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// config := config.GetConfig()
 
-		iam := controllers.NewIndieAuthManager()
-		
 		currentUser := iam.GetCurrentUser(c)
 
 		if requireValidUser && (currentUser == nil) {
@@ -40,4 +38,3 @@ func AuthMiddleware(requireValidUser bool) gin.HandlerFunc {
 		c.Next()
 	}
 }
-
