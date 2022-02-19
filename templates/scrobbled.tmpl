@@ -1,0 +1,24 @@
+{{ define "scrobbled.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "head.tmpl" . }}
+	<body>
+	{{ template "header.tmpl" . }}
+	<main>
+
+	{{ $scrobbleType := .scrobbleType }}
+
+	{{ if .user }}
+	Logged in as {{.user.Me}} <a href="/logout"><button>Log Out</button></a>
+    {{end}}
+
+
+    <p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type={{ .scrobbleType }}">Add {{ .scrobbleTypeName }}</a> &gt; {{.post.MediaItem.DisplayName.String}}</p>
+
+    <h3>Post Complete: <a href="{{.post.URL}}">{{.post.URL}}</a></h3>
+
+	</main>
+    {{ template "footer.tmpl" . }}
+	</body>
+</html>
+{{end}}

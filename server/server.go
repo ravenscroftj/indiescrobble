@@ -29,8 +29,7 @@ func Init() {
 		log.Fatalf("%v\n", err)
 	}
 
-	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.Post{})
+	db.AutoMigrate(&models.User{}, &models.Post{}, &models.MediaItem{})
 
 	r := NewRouter(db)
 	r.LoadHTMLGlob("templates/*.tmpl")

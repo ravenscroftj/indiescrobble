@@ -13,7 +13,7 @@
     {{end}}
 
 
-    <form method="POST" action="/scrobble/preview">
+    <form method="POST" action="/scrobble/do">
 
     <p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type={{ .scrobbleType }}">Add {{ .scrobbleTypeName }}</a> &gt; {{.item.GetDisplayName}}</p>
 
@@ -50,6 +50,7 @@
     
     </div>
 
+    <input type="hidden" name="item" value="{{.item.GetID}}"/>
     <input type="hidden" name="type" value="{{ .scrobbleType }}"/>
 
     </form>

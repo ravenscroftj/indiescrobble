@@ -159,64 +159,27 @@ func (m *MicropubDiscoveryService) Discover(me string, authToken string) (*Micro
 }
 
 /* Send micropub to endpoint */
-func (m *MicropubDiscoveryService) SubmitScrobble(currentUser *models.BaseUser, post *models.Post) (error) {
+func (m *MicropubDiscoveryService) SubmitMicropub(currentUser *models.BaseUser, payload []byte) (*http.Response, error) {
+	
 	endpoint, err := m.findMicropubEndpoint(currentUser.Me)
 
 	if err != nil{
-		return err
+		return nil, err
 	}
 
-	postObj := make(map[string]interface{})
-	postObj["type"] = []string{"h-entry"}
-	postObj["visibility"] = []string{"public"}
 
-	properties := make(map[string]interface{})
-	properties["media-type"]  = []string{post.PostType}
-	properties["media-item-id"] = []string{post.MediaItem.MediaID}
-	properties["media-item-url"] = []string{post.MediaItem.CanonicalURL.String}
-
-	properties["indiescrobble-id"] = post.MediaItem.ID
-
-	if post.MediaItem.ThumbnailURL.Valid{
-		properties["photo"] = []string{post.MediaItem.ThumbnailURL.String}
-	}
-
-	if post.Content.Valid{
-		postObj["content"] = post.Content.String
-	}
-
-	postObj["properties"] = properties
-
-	bodyBytes, err := json.Marshal(postObj)
-
-	if err != nil{
-		return err
-	}
-
-	body := bytes.NewReader(bodyBytes)
+	body := bytes.NewReader(payload)
 
 	req, err := http.NewRequest("POST", endpoint, body)
 	
 	if err != nil{
-		return err
+		return nil, err
 	}
 
 	req.Header.Add("User-Agent", USER_AGENT_STRING)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", currentUser.Token))
+	req.Header.Add("Content-Type", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	return http.DefaultClient.Do(req)
 
-	if err != nil{
-		return err
-	}
-
-	loc, err := resp.Location()
-
-	if err != nil{
-		return err
-	}
-
-	post.URL = loc.String()
-
-	return nil
 } 

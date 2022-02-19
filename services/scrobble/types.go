@@ -14,11 +14,25 @@ var ScrobbleTypeNames =  map[string]string {
 	"read": "📖 Read",
 };
 
+var ScrobbleTypeVerbs = map[string]string {
+	"scrobble" : "listened to",
+	"tv" : "watched",
+	"movie": "watched",
+	"read": "read",
+};
+
 var ScrobblePlaceholders =  map[string]string {
 	"scrobble" : "Jump Van Halen",
 	"tv" : "Schitt's Creek",
 	"movie": "Ferris Bueller's Day Off",
 	"read": "Three Body Problem Cixin Liu",
+};
+
+var ScrobbleCitationProperties = map[string]string {
+	"scrobble" : "listen-of",
+	"tv" : "watch-of",
+	"movie": "watch-of",
+	"read": "read-of",
 };
 
 

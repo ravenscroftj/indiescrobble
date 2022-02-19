@@ -42,6 +42,8 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	
 	authed.POST("/scrobble/preview", scrobbleController.PreviewScrobble)
 
+	authed.POST("/scrobble/do", scrobbleController.DoScrobble)
+
 	// v1 := router.Group("v1")
 	// {
 	// 	userGroup := v1.Group("user")
