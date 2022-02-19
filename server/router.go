@@ -36,8 +36,11 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	authed := router.Use(middlewares.AuthMiddleware(true, iam))
 
 	// add scrobble endpoints
-	authed.GET("/scrobble", controllers.Scrobble)
-	authed.POST("/scrobble/preview", controllers.PreviewScrobble)
+	scrobbleController := controllers.NewScrobbleController(db)
+
+	authed.GET("/scrobble", scrobbleController.ScrobbleForm)
+	
+	authed.POST("/scrobble/preview", scrobbleController.PreviewScrobble)
 
 	// v1 := router.Group("v1")
 	// {

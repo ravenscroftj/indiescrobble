@@ -15,7 +15,7 @@
 
     <form method="POST" action="/scrobble/preview">
 
-    <p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type=movie">Add {{ .scrobbleTypeName }}</a> &gt; {{.item.GetDisplayName}}</p>
+    <p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type={{ .scrobbleType }}">Add {{ .scrobbleTypeName }}</a> &gt; {{.item.GetDisplayName}}</p>
 
     <h3>Preview Post: {{.item.GetDisplayName}}</h3>
 
@@ -49,6 +49,8 @@
     <button type="submit">Submit Post &gt; &gt;</button>
     
     </div>
+
+    <input type="hidden" name="type" value="{{ .scrobbleType }}"/>
 
     </form>
 

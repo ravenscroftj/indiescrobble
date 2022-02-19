@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"git.jamesravey.me/ravenscroftj/indiescrobble/models"
-	"git.jamesravey.me/ravenscroftj/indiescrobble/scrobble"
+	"git.jamesravey.me/ravenscroftj/indiescrobble/services/scrobble"
 	"github.com/gin-gonic/gin"
 )
 

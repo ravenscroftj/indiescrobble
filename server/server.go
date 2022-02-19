@@ -30,6 +30,7 @@ func Init() {
 	}
 
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Post{})
 
 	r := NewRouter(db)
 	r.LoadHTMLGlob("templates/*.tmpl")
