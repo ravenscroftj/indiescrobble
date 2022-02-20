@@ -1,5 +1,11 @@
 {{ define "partial/header.tmpl" }}
 <header>
+
+
+	<h1>
+		IndieScrobble
+	</h1>
+
 	<nav>
 		<a href="/">Home</a>
 		<a href="/faqs">About/FAQs</a>
@@ -12,9 +18,6 @@
 		{{end}}
 	</nav>
 
-	<h1>
-		IndieScrobble
-	</h1>
 	{{ if .user.Me }}
 	Logged in as {{.user.Me}} <a href="/logout"><button>Log Out</button></a>
     {{end}}
