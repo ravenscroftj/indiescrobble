@@ -25,19 +25,3 @@ func Index(c *gin.Context) {
 		"user":          user,
 	})
 }
-
-func FAQ(c *gin.Context){
-	currentUser, exists := c.Get("user")
-
-	var user *models.BaseUser
-
-	if exists {
-		user = currentUser.(*models.BaseUser)
-	}else{
-		user = nil
-	}
-
-	c.HTML(http.StatusOK, "faq.tmpl", gin.H{
-		"user":          user,
-	})
-}
