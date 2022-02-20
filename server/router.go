@@ -24,7 +24,6 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	router.Use(middlewares.AuthMiddleware(false, iam))
 
 	router.GET("/", controllers.Index)
-	router.GET("/faqs", controllers.FAQ)
 
 	router.Static("/static", config.GetString("server.static_path"))
 
