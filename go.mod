@@ -1,4 +1,4 @@
-module git.jamesravey.me/ravenscroftj/indiescrobble
+module github.com/ravenscroftj/indiescrobble
 
 go 1.17
 

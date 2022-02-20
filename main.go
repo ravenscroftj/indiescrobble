@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"git.jamesravey.me/ravenscroftj/indiescrobble/config"
-	"git.jamesravey.me/ravenscroftj/indiescrobble/server"
+	"github.com/ravenscroftj/indiescrobble/config"
+	"github.com/ravenscroftj/indiescrobble/server"
 )
 
 func main() {

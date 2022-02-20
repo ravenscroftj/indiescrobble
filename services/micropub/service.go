@@ -10,20 +10,22 @@ import (
 	"net/url"
 	"strings"
 
-	"git.jamesravey.me/ravenscroftj/indiescrobble/models"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/ravenscroftj/indiescrobble/models"
 )
 
-const(USER_AGENT_STRING="IndieScrobble (indiescrobble.club)")
+const (
+	USER_AGENT_STRING = "IndieScrobble (indiescrobble.club)"
+)
 
 type MicropubDiscoveryService struct {
 }
 
-func (m *MicropubDiscoveryService) doGet(url string ) (*http.Response, error) {
+func (m *MicropubDiscoveryService) doGet(url string) (*http.Response, error) {
 	client := http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 
-	req.Header.Add("User-Agent",  USER_AGENT_STRING)
+	req.Header.Add("User-Agent", USER_AGENT_STRING)
 
 	if err != nil {
 		return nil, err
@@ -32,13 +34,12 @@ func (m *MicropubDiscoveryService) doGet(url string ) (*http.Response, error) {
 	return client.Do(req)
 }
 
-
-func (m *MicropubDiscoveryService) doAuthGet(url string, bearerToken string ) (*http.Response, error) {
+func (m *MicropubDiscoveryService) doAuthGet(url string, bearerToken string) (*http.Response, error) {
 	client := http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 
 	req.Header.Add("User-Agent", USER_AGENT_STRING)
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v",bearerToken))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", bearerToken))
 
 	if err != nil {
 		return nil, err
@@ -75,25 +76,25 @@ func (m *MicropubDiscoveryService) findMicropubEndpoint(me string) (string, erro
 	}
 
 	// parse the returned URL
-	endpointUrl, err := url.Parse(s.AttrOr("href",""))
+	endpointUrl, err := url.Parse(s.AttrOr("href", ""))
 
-	if err != nil{
+	if err != nil {
 		return "", err
 	}
 
-	if !endpointUrl.IsAbs(){
-		
-		if(strings.HasPrefix(endpointUrl.Path, "/")) {
+	if !endpointUrl.IsAbs() {
+
+		if strings.HasPrefix(endpointUrl.Path, "/") {
 
 			newUrl := *res.Request.URL
 			newUrl.Path = endpointUrl.Path
 
 			return newUrl.String(), nil
-		}else{
-			return res.Request.URL.String() +  endpointUrl.Path, nil
+		} else {
+			return res.Request.URL.String() + endpointUrl.Path, nil
 		}
 
-	}else{
+	} else {
 		return endpointUrl.String(), nil
 	}
 }
@@ -102,17 +103,17 @@ func (m *MicropubDiscoveryService) getMicropubConfig(endpoint string, authToken 
 
 	configUrl, err := url.Parse(endpoint)
 
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
 	q := configUrl.Query()
-	q.Set("q","config")
+	q.Set("q", "config")
 	configUrl.RawQuery = q.Encode()
 
 	res, err := m.doAuthGet(configUrl.String(), authToken)
 
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
@@ -140,7 +141,7 @@ func (m *MicropubDiscoveryService) Discover(me string, authToken string) (*Micro
 
 	endpoint, err := m.findMicropubEndpoint(me)
 
-	if err != nil{
+	if err != nil {
 		log.Printf("Failed to get endpoint: %v\n", err)
 		return nil, err
 	}
@@ -148,31 +149,29 @@ func (m *MicropubDiscoveryService) Discover(me string, authToken string) (*Micro
 	// get endpoint config
 	config, err := m.getMicropubConfig(endpoint, authToken)
 
-
-	if err != nil{
+	if err != nil {
 		log.Printf("Failed to get configuration: %v\n", err)
 		return nil, err
 	}
 
 	return config, nil
-	
+
 }
 
 /* Send micropub to endpoint */
 func (m *MicropubDiscoveryService) SubmitMicropub(currentUser *models.BaseUser, payload []byte) (*http.Response, error) {
-	
+
 	endpoint, err := m.findMicropubEndpoint(currentUser.Me)
 
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
-
 
 	body := bytes.NewReader(payload)
 
 	req, err := http.NewRequest("POST", endpoint, body)
-	
-	if err != nil{
+
+	if err != nil {
 		return nil, err
 	}
 
@@ -182,4 +181,4 @@ func (m *MicropubDiscoveryService) SubmitMicropub(currentUser *models.BaseUser, 
 
 	return http.DefaultClient.Do(req)
 
-} 
+}

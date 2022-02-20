@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"time"
 
-	"git.jamesravey.me/ravenscroftj/indiescrobble/config"
-	"git.jamesravey.me/ravenscroftj/indiescrobble/models"
-	"git.jamesravey.me/ravenscroftj/indiescrobble/services/micropub"
+	"github.com/ravenscroftj/indiescrobble/config"
+	"github.com/ravenscroftj/indiescrobble/models"
+	"github.com/ravenscroftj/indiescrobble/services/micropub"
 	"gorm.io/gorm"
 )
 
@@ -18,14 +18,14 @@ type Scrobbler struct {
 	db *gorm.DB
 }
 
-func NewScrobbler(db *gorm.DB) *Scrobbler{
-	return &Scrobbler{db:db}
+func NewScrobbler(db *gorm.DB) *Scrobbler {
+	return &Scrobbler{db: db}
 }
 
 func (s *Scrobbler) ValidateType(form *url.Values) error {
 
 	scrobbleType := form.Get("type")
-	if _, ok := ScrobbleTypeNames[scrobbleType]; !ok{
+	if _, ok := ScrobbleTypeNames[scrobbleType]; !ok {
 		return fmt.Errorf("unknown/invalid scrobble type %v", scrobbleType)
 	}
 
@@ -42,7 +42,7 @@ func (s *Scrobbler) GetItemByID(form *url.Values) (ScrobbleMetaRecord, error) {
 
 	item, err := searchEngine.SearchProvider.GetItem(form.Get("item"))
 
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
@@ -61,7 +61,7 @@ func (s *Scrobbler) Search(form *url.Values) ([]ScrobbleMetaRecord, error) {
 	query := form.Get("q")
 
 	return searchEngine.SearchProvider.Search(query)
-	
+
 }
 
 func (s *Scrobbler) GetSearchEngineNameForType(scrobbleType string) string {
@@ -75,16 +75,15 @@ func (s *Scrobbler) BuildMicroPubPayload(post *models.Post) ([]byte, error) {
 
 	properties := make(map[string]interface{})
 
-	if post.MediaItem.ThumbnailURL.Valid{
+	if post.MediaItem.ThumbnailURL.Valid {
 		properties["photo"] = []string{post.MediaItem.ThumbnailURL.String}
 	}
 
-	if post.Rating.Valid{
+	if post.Rating.Valid {
 		properties["rating"] = []string{post.Rating.String}
 	}
 
 	properties["summary"] = []string{s.GenerateSummary(post)}
-	
 
 	citationProps := make(map[string]interface{})
 	citationProps["name"] = []string{post.MediaItem.DisplayName.String}
@@ -99,50 +98,49 @@ func (s *Scrobbler) BuildMicroPubPayload(post *models.Post) ([]byte, error) {
 	// use the appropriate citation property e.g. read-of or watch-of
 	properties[ScrobbleCitationProperties[post.PostType]] = citation
 
-	if post.Content.Valid{
+	if post.Content.Valid {
 		properties["content"] = []string{post.Content.String}
 	}
 
 	postObj["properties"] = properties
 
-
-	return json.MarshalIndent(postObj, "","  ")
+	return json.MarshalIndent(postObj, "", "  ")
 }
 
-func (s *Scrobbler) GenerateSummary(post *models.Post) string{
-	return fmt.Sprintf("%v %v %v and gave it %v/5", 
-	ScrobbleTypeEmojis[post.PostType],
-	ScrobbleTypeVerbs[post.PostType], 
-	post.MediaItem.DisplayName.String, 
-	post.Rating.String)
+func (s *Scrobbler) GenerateSummary(post *models.Post) string {
+	return fmt.Sprintf("%v %v %v and gave it %v/5",
+		ScrobbleTypeEmojis[post.PostType],
+		ScrobbleTypeVerbs[post.PostType],
+		post.MediaItem.DisplayName.String,
+		post.Rating.String)
 }
 
 func (s *Scrobbler) Preview(form *url.Values) (*models.Post, error) {
 
-	if err := s.ValidateType(form); err != nil{
+	if err := s.ValidateType(form); err != nil {
 		return nil, err
 	}
-	
+
 	item := models.MediaItem{}
 	result := s.db.Where(&models.MediaItem{MediaID: form.Get("item")}).First(&item)
 
-	if result.Error != nil{
+	if result.Error != nil {
 		return nil, result.Error
 	}
 
 	post := models.Post{
-		MediaItem: item, 
-		PostType: form.Get("type"),
-		Content: sql.NullString{String: form.Get("content"), Valid: true},
-		Rating:  sql.NullString{String: form.Get("rating"), Valid: true},
+		MediaItem: item,
+		PostType:  form.Get("type"),
+		Content:   sql.NullString{String: form.Get("content"), Valid: true},
+		Rating:    sql.NullString{String: form.Get("rating"), Valid: true},
 	}
 
 	time, err := time.Parse(config.BROWSER_TIME_FORMAT, form.Get("when"))
 
-	if err == nil{
+	if err == nil {
 		post.ScrobbledAt = sql.NullTime{Time: time, Valid: true}
-	}else{
-		log.Printf("Failed to parse time %v because %v",form.Get("when"), err )
+	} else {
+		log.Printf("Failed to parse time %v because %v", form.Get("when"), err)
 	}
 
 	return &post, nil
@@ -150,42 +148,39 @@ func (s *Scrobbler) Preview(form *url.Values) (*models.Post, error) {
 
 func (s *Scrobbler) Scrobble(form *url.Values, currentUser *models.BaseUser) (*models.Post, error) {
 
-	if err := s.ValidateType(form); err != nil{
+	if err := s.ValidateType(form); err != nil {
 		return nil, err
 	}
-	
+
 	item := models.MediaItem{}
 	result := s.db.Where(&models.MediaItem{MediaID: form.Get("item")}).First(&item)
 
-	if result.Error != nil{
+	if result.Error != nil {
 		log.Printf("Error finding media item with ID %v in db: %v\n", form.Get("item"), result.Error)
 		return nil, result.Error
 	}
 
 	discovery := micropub.MicropubDiscoveryService{}
-	
 
 	post := models.Post{
-		MediaItem: item, 
-		User: *currentUser.UserRecord, 
-		PostType: form.Get("type"),
-		Content: sql.NullString{String: form.Get("content"), Valid: true},
-		Rating:  sql.NullString{String: form.Get("rating"), Valid: true},
+		MediaItem: item,
+		User:      *currentUser.UserRecord,
+		PostType:  form.Get("type"),
+		Content:   sql.NullString{String: form.Get("content"), Valid: true},
+		Rating:    sql.NullString{String: form.Get("rating"), Valid: true},
 	}
-
 
 	time, err := time.Parse(config.BROWSER_TIME_FORMAT, form.Get("when"))
 
-	if err == nil{
+	if err == nil {
 		post.ScrobbledAt = sql.NullTime{Time: time, Valid: true}
-	}else{
-		log.Printf("Failed to parse time %v because %v",form.Get("when"), err )
+	} else {
+		log.Printf("Failed to parse time %v because %v", form.Get("when"), err)
 	}
 
 	postBody, err := s.BuildMicroPubPayload(&post)
 
-
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
@@ -193,14 +188,14 @@ func (s *Scrobbler) Scrobble(form *url.Values, currentUser *models.BaseUser) (*m
 
 	resp, err := discovery.SubmitMicropub(currentUser, postBody)
 
-	if err != nil{
+	if err != nil {
 		log.Printf("Error creating user post: %v\n", err)
 		return nil, err
 	}
 
 	loc, err := resp.Location()
 
-	if err != nil{
+	if err != nil {
 		log.Printf("Error getting Location header from user micropub endpoint: %v\n", err)
 		return nil, err
 	}
@@ -208,12 +203,10 @@ func (s *Scrobbler) Scrobble(form *url.Values, currentUser *models.BaseUser) (*m
 	post.URL = loc.String()
 	result = s.db.Create(&post)
 
-	if result.Error != nil{
+	if result.Error != nil {
 		log.Printf("Error creating post in database: %v\n", result.Error)
 		return nil, result.Error
 	}
 
 	return &post, nil
 }
-
-

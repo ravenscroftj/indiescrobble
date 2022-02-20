@@ -3,8 +3,8 @@ package middlewares
 import (
 	"net/http"
 
-	"git.jamesravey.me/ravenscroftj/indiescrobble/controllers"
 	"github.com/gin-gonic/gin"
+	"github.com/ravenscroftj/indiescrobble/controllers"
 )
 
 func AuthMiddleware(requireValidUser bool, iam *controllers.IndieAuthManager) gin.HandlerFunc {

@@ -1,10 +1,10 @@
 package server
 
 import (
-	"git.jamesravey.me/ravenscroftj/indiescrobble/config"
-	"git.jamesravey.me/ravenscroftj/indiescrobble/controllers"
-	"git.jamesravey.me/ravenscroftj/indiescrobble/middlewares"
 	"github.com/gin-gonic/gin"
+	"github.com/ravenscroftj/indiescrobble/config"
+	"github.com/ravenscroftj/indiescrobble/controllers"
+	"github.com/ravenscroftj/indiescrobble/middlewares"
 	"gorm.io/gorm"
 )
 
@@ -39,7 +39,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	scrobbleController := controllers.NewScrobbleController(db)
 
 	authed.GET("/scrobble", scrobbleController.ScrobbleForm)
-	
+
 	authed.POST("/scrobble/preview", scrobbleController.PreviewScrobble)
 
 	authed.POST("/scrobble/do", scrobbleController.DoScrobble)

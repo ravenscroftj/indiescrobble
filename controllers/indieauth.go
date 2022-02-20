@@ -9,12 +9,12 @@ import (
 	"net/url"
 	"time"
 
-	"git.jamesravey.me/ravenscroftj/indiescrobble/config"
-	"git.jamesravey.me/ravenscroftj/indiescrobble/models"
 	"github.com/gin-gonic/gin"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/hacdias/indieauth"
 	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/ravenscroftj/indiescrobble/config"
+	"github.com/ravenscroftj/indiescrobble/models"
 	"gorm.io/gorm"
 )
 

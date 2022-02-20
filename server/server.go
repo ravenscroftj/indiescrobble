@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"git.jamesravey.me/ravenscroftj/indiescrobble/config"
-	"git.jamesravey.me/ravenscroftj/indiescrobble/models"
+	"github.com/ravenscroftj/indiescrobble/config"
+	"github.com/ravenscroftj/indiescrobble/models"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"

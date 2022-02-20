@@ -3,8 +3,8 @@ package controllers
 import (
 	"net/http"
 
-	"git.jamesravey.me/ravenscroftj/indiescrobble/models"
 	"github.com/gin-gonic/gin"
+	"github.com/ravenscroftj/indiescrobble/models"
 )
 
 func Index(c *gin.Context) {
@@ -16,12 +16,12 @@ func Index(c *gin.Context) {
 
 	if exists {
 		user = currentUser.(*models.BaseUser)
-	}else{
+	} else {
 		user = nil
 	}
 
 	c.HTML(http.StatusOK, "index.tmpl", gin.H{
-		"title":         "test",
-		"user":          user,
+		"title": "test",
+		"user":  user,
 	})
 }
