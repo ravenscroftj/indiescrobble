@@ -1,8 +1,9 @@
+{{ define "scrobble/begin.tmpl" }}
 <!DOCTYPE html>
 <html lang="en">
-	{{ template "head.tmpl" . }}
+	{{ template "partial/head.tmpl" . }}
 	<body>
-	{{ template "header.tmpl" . }}
+	{{ template "partial/header.tmpl" . }}
 	<main>
 
 	{{ if .user }}
@@ -35,3 +36,4 @@
 	{{ template "footer.tmpl" . }}
 	</body>
 </html>
+{{end}}

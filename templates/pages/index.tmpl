@@ -1,0 +1,32 @@
+{{ define "index.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "partial/head.tmpl" . }}
+	<body>
+	{{ template "partial/header.tmpl" . }}
+	<main>
+
+	<p>Welcome to indiescrobble! IndieScrobble is a <a href="https://micropub.spec.indieweb.org/">MicroPub</a> compliant tool
+	for posting about your watches, reads and scrobbles directly back to your site.</p>
+	{{ if .user }}
+	
+	<ul>
+		<li><a href="/scrobble/">Add a scrobble</a></li>
+		<li><a href="/posts">View your posts</a></li>
+	</ul>
+
+	{{else}}
+
+	<form action="/indieauth" method="POST">
+	<p>
+		<label>Your domain: </label>
+		<input type="text" name="domain"/>
+		<button type="submit">Log in</button>
+	</p>
+	</form>
+	{{ end }}
+	</main>
+	{{ template "partial/footer.tmpl" . }}
+	</body>
+</html>
+{{end}}

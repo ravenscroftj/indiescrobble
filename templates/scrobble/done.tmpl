@@ -1,16 +1,12 @@
-{{ define "scrobbled.tmpl" }}
+{{ define "scrobble/done.tmpl" }}
 <!DOCTYPE html>
 <html lang="en">
-	{{ template "head.tmpl" . }}
+	{{ template "partial/head.tmpl" . }}
 	<body>
-	{{ template "header.tmpl" . }}
+	{{ template "partial/header.tmpl" . }}
 	<main>
 
 	{{ $scrobbleType := .scrobbleType }}
-
-	{{ if .user }}
-	Logged in as {{.user.Me}} <a href="/logout"><button>Log Out</button></a>
-    {{end}}
 
 
     <p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type={{ .scrobbleType }}">Add {{ .scrobbleTypeName }}</a> &gt; {{.post.MediaItem.DisplayName.String}}</p>
@@ -18,7 +14,7 @@
     <h3>Post Complete: <a href="{{.post.URL}}">{{.post.URL}}</a></h3>
 
 	</main>
-    {{ template "footer.tmpl" . }}
+    {{ template "partial/footer.tmpl" . }}
 	</body>
 </html>
 {{end}}

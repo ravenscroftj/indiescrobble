@@ -1,0 +1,21 @@
+{{ define "faq.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "partial/head.tmpl" . }}
+	<body>
+	{{ template "partial/header.tmpl" . }}
+	<main>
+
+	<p>Welcome to indiescrobble! IndieScrobble is a <a href="https://micropub.spec.indieweb.org/">MicroPub</a> compliant tool
+	for posting about your watches, reads and scrobbles directly back to your site.</p>
+
+    <h3>Is it copyright infringement to display movie/tv posters, book covers, album covers on my website?</h3>
+    <p>I am not a lawyer however, it is my understanding that review is an example of "fair usage" of related promotional material 
+    as per <a href="https://splc.org/2019/03/ask-splc-can-we-use-an-image-found-online-to-illustrate-a-movie-review/">this legal thread</a></p>
+
+	</main>
+	{{ template "partial/footer.tmpl" . }}
+	</body>
+</html>
+{{end}}
+

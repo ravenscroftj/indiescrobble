@@ -1,0 +1,13 @@
+{{ define "error.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "partial/head.tmpl" . }}
+	<body>
+	{{ template "partial/header.tmpl" . }}
+	<main>
+	<h2>Error</h2>
+	{{ .message }}
+	</main>
+	</body>
+</html>
+{{ end }}

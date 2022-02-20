@@ -1,0 +1,46 @@
+{{ define "scrobble/search.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "partial/head.tmpl" . }}
+	<body>
+	{{ template "partial/header.tmpl" . }}
+	<main>
+
+	{{ $scrobbleType := .scrobbleType }}
+
+
+	{{if .searchResults}}
+
+		<p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type=movie">Add {{ .scrobbleTypeName }}</a> &gt; {{.searchEngine}} Results</p>
+
+		<ul>
+        {{ $scrobbleType := .scrobbleType }}
+		{{range $result := .searchResults}}
+
+			<li>
+				<a href="/scrobble?type={{$scrobbleType}}&item={{$result.GetID}}">{{$result.GetDisplayName}}</a> 
+				<a href="{{$result.GetCanonicalURL}}" target="_blank">(🔍more info)</a>
+			</li>
+
+		{{end}}
+		</ul>
+
+	{{ else }}
+		<form method="GET" action="/scrobble">
+		<h2><a href="/">Add A Post</a> Add {{ .scrobbleTypeName }}</h2>
+
+		<p>Search <b>{{.searchEngine}}</b> for items to scrobble<p>
+
+		<input type="text" name="q" placeholder="{{.scrobblePlaceholder}}">
+
+		<button type="submit">Next &gt;&gt;</button>
+
+		<input type="hidden" name="type" value="{{.scrobbleType}}"/>
+		</form>
+
+	{{end}}
+	</main>
+	{{ template "partial/footer.tmpl" . }}
+	</body>
+</html>
+{{end}}

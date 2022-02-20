@@ -1,0 +1,23 @@
+{{ define "partial/header.tmpl" }}
+<header>
+	<nav>
+		<a href="/">Home</a>
+		<a href="/faqs">About/FAQs</a>
+		{{ if .user }}
+		<a href="/scrobble/">Add a Scrobble</a>
+		<a href="">My Posts</a>
+		<a href="">My Settings</a>
+		{{else}}
+			<a href="/">Sign in via IndieAuth</a>
+		{{end}}
+	</nav>
+
+	<h1>
+		IndieScrobble
+	</h1>
+	{{ if .user.Me }}
+	Logged in as {{.user.Me}} <a href="/logout"><button>Log Out</button></a>
+    {{end}}
+
+</header>
+{{end}}

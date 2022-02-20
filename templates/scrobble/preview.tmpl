@@ -1,0 +1,73 @@
+{{ define "scrobble/preview.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "partial/head.tmpl" . }}
+	<body>
+	{{ template "partial/header.tmpl" . }}
+	<main>
+
+	{{ $scrobbleType := .scrobbleType }}
+
+
+    <form method="POST" action="/scrobble/do">
+
+    <p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type={{ .scrobbleType }}">Add {{ .scrobbleTypeName }}</a> &gt; {{.post.MediaItem.DisplayName.String}}</p>
+
+    <h3>Preview Post: {{.post.MediaItem.DisplayName.String}}</h3>
+
+    <h4>Summary</h4>
+    <p>{{.summary}}</p>
+
+    <h4>Thumbnail</h4>
+    <div class="float-left">
+
+        {{if .post.MediaItem.ThumbnailURL.Valid}}
+            <img class="thumbnail" src="{{.post.MediaItem.ThumbnailURL.String}}"/>
+        {{end}}
+
+            
+    </div>
+
+    <div>
+    <h4>Details</h4>
+    <label>When: <b>{{.post.ScrobbledAt.Time}}</b></label> <input type="hidden" name="when" value="{{.when}}" /><br/>
+
+    <label>Rating: (out of 5)</label> <b>{{.post.Rating.String}}</b> <input type="hidden" name="rating" value="{{.rating}}"/> <br/>
+
+    <label>Note/Content: </label> <br>
+    <blockquote>{{.post.Content.String}}</blockquote>
+    <input type="hidden" name="content" value="{{.post.Content.String}}"/>
+
+    {{if .config.SyndicateTargets}}
+        <h4>Syndication Options</h4>
+        {{ range $target := .config.SyndicateTargets}}
+        <label><input type="checkbox" name="mp-syndicate[]" value="{{$target.Uid}}" /> {{$target.Name}}</label><br />
+        {{end}}
+    {{end}}
+
+    <br/>
+
+
+    <details>
+    <summary>Micropub Payload Details</summary>
+    <pre>{{.postBody}}</pre>
+    </details>
+
+        
+    <button type="submit">Submit Post &gt; &gt;</button>
+    
+
+    </div>
+    <input type="hidden" name="item" value="{{.post.MediaItem.MediaID}}"/>
+    <input type="hidden" name="type" value="{{ .scrobbleType }}"/>
+
+    </form>
+
+
+
+
+	</main>
+    {{ template "partial/footer.tmpl" . }}
+	</body>
+</html>
+{{end}}

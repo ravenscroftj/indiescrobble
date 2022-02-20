@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"time"
 
+	"git.jamesravey.me/ravenscroftj/indiescrobble/config"
 	"git.jamesravey.me/ravenscroftj/indiescrobble/models"
-	"git.jamesravey.me/ravenscroftj/indiescrobble/services/scrobble"
 	"git.jamesravey.me/ravenscroftj/indiescrobble/services/micropub"
+	"git.jamesravey.me/ravenscroftj/indiescrobble/services/scrobble"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -36,7 +37,20 @@ func (s *ScrobbleController) DoScrobble(c *gin.Context){
 		return
 	}
 
-	s.scrobbler.Scrobble(&c.Request.Form, currentUser)
+	post, err := s.scrobbler.Scrobble(&c.Request.Form, currentUser)
+
+	if err != nil{
+		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{
+			"message": err,
+		})
+		return
+	}
+
+	c.HTML(http.StatusOK, "scrobble/done.tmpl", gin.H{
+		"user": currentUser,
+		"scrobbleTypeName": scrobble.ScrobbleTypeNames[post.PostType],
+		"post": post,
+	})
 }
 
 
@@ -69,13 +83,13 @@ func (s *ScrobbleController) ScrobbleForm(c *gin.Context){
 			})
 			return
 		}else{
-			c.HTML(http.StatusOK, "scrobble.tmpl", gin.H{
+			c.HTML(http.StatusOK, "scrobble/compose.tmpl", gin.H{
 				"user": currentUser,
 				"scrobbleType": scrobbleType,
 				"scrobblePlaceholder":  scrobble.ScrobblePlaceholders[scrobbleType],
 				"scrobbleTypeName": scrobble.ScrobbleTypeNames[scrobbleType],
 				"item": item,
-				"now": time.Now().Format("2006-01-02T15:04"),
+				"now": time.Now().Format(config.BROWSER_TIME_FORMAT),
 			})
 			return
 		}
@@ -91,7 +105,7 @@ func (s *ScrobbleController) ScrobbleForm(c *gin.Context){
 			return
 		}
 
-		c.HTML(http.StatusOK, "scrobble.tmpl", gin.H{
+		c.HTML(http.StatusOK, "scrobble/search.tmpl", gin.H{
 			"user": currentUser,
 			"scrobbleType": scrobbleType,
 			"scrobblePlaceholder":  scrobble.ScrobblePlaceholders[scrobbleType],
@@ -100,18 +114,25 @@ func (s *ScrobbleController) ScrobbleForm(c *gin.Context){
 			"searchResults": searchResults,
 			"now": time.Now().Format("2006-01-02T15:04"),
 		})
-	}else{
-		c.HTML(http.StatusOK, "scrobble.tmpl", gin.H{
+	}else if scrobbleType := c.Request.Form.Get("type"); scrobbleType != "" {
+		c.HTML(http.StatusOK, "scrobble/search.tmpl", gin.H{
 			"user": currentUser,
 			"scrobbleType": scrobbleType,
 			"scrobblePlaceholder":  scrobble.ScrobblePlaceholders[scrobbleType],
 			"scrobbleTypeName": scrobble.ScrobbleTypeNames[scrobbleType],
 			"now": time.Now().Format("2006-01-02T15:04"),
 		})
+	}else{
+		c.HTML(http.StatusOK, "scrobble/begin.tmpl", gin.H{
+			"user": currentUser,
+			"scrobbleTypes": scrobble.ScrobbleTypeNames,
+			"now": time.Now().Format("2006-01-02T15:04"),
+		})
 	}
 
 }
 
+/*Preview the content of a scrobble to be submitted to \*/
 func (s *ScrobbleController) PreviewScrobble(c *gin.Context){
 
 	err := c.Request.ParseForm()
@@ -125,20 +146,16 @@ func (s *ScrobbleController) PreviewScrobble(c *gin.Context){
 		})
 	}
 
-	scrobbleType := c.Request.Form.Get("type")
+	post, err := s.scrobbler.Preview(&c.Request.Form)
 
-	searchEngine := scrobble.NewSearchProvider(scrobbleType, s.db)
-
-	itemID := c.Request.Form.Get("item")
-
-	item, err := searchEngine.SearchProvider.GetItem(itemID)
 
 	if err != nil{
 		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{
 			"message": err,
 		})
-		return
 	}
+
+	scrobbleType := c.Request.Form.Get("type")
 
 	discovery := micropub.MicropubDiscoveryService{}
 	
@@ -151,15 +168,23 @@ func (s *ScrobbleController) PreviewScrobble(c *gin.Context){
 		return
 	}
 
-	c.HTML(http.StatusOK, "preview.tmpl", gin.H{
+	postBody, err := s.scrobbler.BuildMicroPubPayload(post)
+	
+	if err != nil{
+		c.HTML(http.StatusBadRequest, "error.tmpl", gin.H{
+			"message": err,
+		})
+		return
+	}
+
+	c.HTML(http.StatusOK, "scrobble/preview.tmpl", gin.H{
 		"user": currentUser,
 		"scrobbleType": scrobbleType,
 		"scrobbleTypeName": scrobble.ScrobbleTypeNames[scrobbleType],
-		"item": item,
-		"when": c.Request.Form.Get("when"),
-		"rating": c.Request.Form.Get("rating"),
-		"content": c.Request.Form.Get("content"),
+		"post": post,
 		"config": config,
+		"summary": s.scrobbler.GenerateSummary(post),
+		"postBody": string(postBody),
 	})
 
 }

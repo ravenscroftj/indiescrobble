@@ -7,6 +7,13 @@ const(
 	SCROBBLE_TYPE_READ = "read"
 )
 
+var ScrobbleTypeEmojis = map[string]string {
+	"scrobble" : "🎧",
+	"tv" : "📺",
+	"movie": "🎬",
+	"read": "📖",
+};
+
 var ScrobbleTypeNames =  map[string]string {
 	"scrobble" : "🎧 Listen",
 	"tv" : "📺 TV Show",

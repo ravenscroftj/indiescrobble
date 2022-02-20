@@ -7,6 +7,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const(
+	BROWSER_TIME_FORMAT = "2006-01-02T15:04"
+)
+
 var config *viper.Viper
 
 // Init is an exported method that takes the environment starts the viper

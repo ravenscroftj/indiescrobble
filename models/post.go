@@ -16,4 +16,5 @@ type Post struct {
 	MediaItem MediaItem
 	ScrobbledAt sql.NullTime
 	Content sql.NullString
+	Rating sql.NullString
 }

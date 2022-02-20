@@ -32,6 +32,6 @@ func Init() {
 	db.AutoMigrate(&models.User{}, &models.Post{}, &models.MediaItem{})
 
 	r := NewRouter(db)
-	r.LoadHTMLGlob("templates/*.tmpl")
+	r.LoadHTMLGlob("templates/**/*.tmpl")
 	r.Run(fmt.Sprintf("%v:%v", config.GetString("server.host"), config.GetString("server.port")))
 }

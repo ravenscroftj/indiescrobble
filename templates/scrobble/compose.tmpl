@@ -1,0 +1,47 @@
+{{ define "scrobble/compose.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "partial/head.tmpl" . }}
+	<body>
+	{{ template "partial/header.tmpl" . }}
+	<main>
+
+	{{ $scrobbleType := .scrobbleType }}
+
+    <form method="POST" action="/scrobble/preview">
+
+    <p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type=movie">Add {{ .scrobbleTypeName }}</a> &gt; {{.item.GetDisplayName}}</p>
+
+    <h3>{{.item.GetDisplayName}}</h3>
+
+    <div class="float-left">
+
+        {{if .item.GetThumbnailURL}}
+            <img class="thumbnail" src="{{.item.GetThumbnailURL}}"/>
+        {{end}}
+
+            
+    </div>
+
+    <div>
+
+    <label>When: </label> <input type="datetime-local" name='when' value="{{.now}}"/><br/>
+
+    <label>Rating: (out of 5)</label> <input type="number" name='rating'/><br/>
+
+    <label>Note/Content: </label> <br>
+    <textarea rows="6" name='content'></textarea>
+
+    <br/>
+    <button type="submit">Preview &gt; &gt;</button>
+    
+    </div>
+    <input type="hidden" name="item" value="{{.item.GetID}}"/>
+    <input type="hidden" name="type" value="{{.scrobbleType}}"/>
+    </form>
+
+	</main>
+	{{ template "partial/footer.tmpl" . }}
+	</body>
+</html>
+{{end}}
