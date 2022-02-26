@@ -11,7 +11,7 @@
 
 	{{if .searchResults}}
 
-		<p><a href="/">Add A Post</a> &gt; <a href="/scrobble?type=movie">Add {{ .scrobbleTypeName }}</a> &gt; {{.searchEngine}} Results</p>
+		<p><a href="/scrobble/">Add A Post</a> &gt; <a href="/scrobble?type=movie">Add {{ .scrobbleTypeName }}</a> &gt; {{.searchEngine}} Results</p>
 
 		<ul>
         {{ $scrobbleType := .scrobbleType }}
@@ -27,7 +27,7 @@
 
 	{{ else }}
 		<form method="GET" action="/scrobble">
-		<h2><a href="/">Add A Post</a> Add {{ .scrobbleTypeName }}</h2>
+		<h2><a href="/scrobble/">Add A Post</a> &gt; Add {{ .scrobbleTypeName }}</h2>
 
 		<p>Search <b>{{.searchEngine}}</b> for items to scrobble<p>
 

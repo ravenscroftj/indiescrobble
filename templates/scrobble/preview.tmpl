@@ -29,7 +29,7 @@
     </div>
 
     <div>
-    <h4>Details</h4>
+    <h4>Post Details</h4>
     <label>When: <b>{{.post.ScrobbledAt.Time}}</b></label> <input type="hidden" name="when" value="{{.when}}" /><br/>
 
     {{ if .rating }}
@@ -44,18 +44,32 @@
         <input type="hidden" name="content" value="{{.post.Content.String}}"/>
     {{end}}
 
+    <h4>Sharing Options</h4>
+    <p>Your post <b>{{if .post.SharePost}}will{{else}}will not{{end}}</b> be added to the IndieScrobble statistics and site directory.</p>
+
+    
     {{if .config.SyndicateTargets}}
         <h4>Syndication Options</h4>
+        Coming Soon!
+        <!--
         {{ range $target := .config.SyndicateTargets}}
         <label><input type="checkbox" name="mp-syndicate[]" value="{{$target.Uid}}" /> {{$target.Name}}</label><br />
         {{end}}
+        -->
     {{end}}
+    
 
     <br/>
 
 
+    <h4>Micropub Payload Details</h4>
+
+    <p>Your post <b>{{if .post.WithWatchOf}}will{{else}}will not{{end}}</b> contain <code>watch-of</code> properties</p>
+
+    
+
     <details>
-    <summary>Micropub Payload Details</summary>
+    <summary>JSON Payload</summary>
     <pre>{{.postBody}}</pre>
     </details>
 
