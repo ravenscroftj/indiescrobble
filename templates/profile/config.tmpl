@@ -1,0 +1,34 @@
+{{ define "profile/config.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "partial/head.tmpl" . }}
+	<body>
+	{{ template "partial/header.tmpl" . }}
+	<main>
+
+	<h2>IndieScrobble User Preferences</h2>
+
+	<form method="POST" action="/profile/config">
+
+
+    <label>
+        <input type="checkbox" name="default_share_posts" value="1" {{if .user.UserRecord.DefaultSharePost}}checked{{end}}/>
+        Share new scrobbles by default
+        <p>If enabled then the "share this scrobble" box will be ticked by default when you submit a new post in future.</p>
+    </label>
+    
+    <label>
+        <input type="checkbox" name="default_enable_watchof" value="1" {{if .user.UserRecord.DefaultEnableWatchOf}}checked{{end}}/>
+        Enable <i>watch-of</i> micropub property by default
+        <p>If enabled then the "include experimental watch-of properties" box will be ticked by default when you submit a new post in future.</p>
+    </label>
+    
+    
+    <button type="submit">Save Changes</button>
+	</form>
+
+	</main>
+	{{ template "footer.tmpl" . }}
+	</body>
+</html>
+{{end}}

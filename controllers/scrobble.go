@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -49,6 +50,7 @@ func (s *ScrobbleController) DoScrobble(c *gin.Context) {
 		"user":             currentUser,
 		"scrobbleTypeName": scrobble.ScrobbleTypeNames[post.PostType],
 		"post":             post,
+		"title": 			"Preview Post",
 	})
 }
 
@@ -86,6 +88,7 @@ func (s *ScrobbleController) ScrobbleForm(c *gin.Context) {
 				"scrobbleTypeName":    scrobble.ScrobbleTypeNames[scrobbleType],
 				"item":                item,
 				"now":                 time.Now().Format(config.BROWSER_TIME_FORMAT),
+				"title": 			   "Compose a Post",
 			})
 			return
 		}
@@ -109,6 +112,7 @@ func (s *ScrobbleController) ScrobbleForm(c *gin.Context) {
 			"searchEngine":        s.scrobbler.GetSearchEngineNameForType(scrobbleType),
 			"searchResults":       searchResults,
 			"now":                 time.Now().Format("2006-01-02T15:04"),
+			"title":               "Add A Post",
 		})
 	} else if scrobbleType := c.Request.Form.Get("type"); scrobbleType != "" {
 		c.HTML(http.StatusOK, "scrobble/search.tmpl", gin.H{
@@ -117,12 +121,14 @@ func (s *ScrobbleController) ScrobbleForm(c *gin.Context) {
 			"scrobblePlaceholder": scrobble.ScrobblePlaceholders[scrobbleType],
 			"scrobbleTypeName":    scrobble.ScrobbleTypeNames[scrobbleType],
 			"now":                 time.Now().Format("2006-01-02T15:04"),
+			"title":               "Add A Post",
 		})
 	} else {
 		c.HTML(http.StatusOK, "scrobble/begin.tmpl", gin.H{
 			"user":          currentUser,
 			"scrobbleTypes": scrobble.ScrobbleTypeNames,
 			"now":           time.Now().Format("2006-01-02T15:04"),
+			"title":         "Add A Post",
 		})
 	}
 
@@ -180,6 +186,7 @@ func (s *ScrobbleController) PreviewScrobble(c *gin.Context) {
 		"config":           config,
 		"summary":          s.scrobbler.GenerateSummary(post),
 		"postBody":         string(postBody),
+		"title": fmt.Sprintf("Post Preview: %v", post.MediaItem.DisplayName.String),
 	})
 
 }

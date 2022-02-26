@@ -15,10 +15,10 @@ var ScrobbleTypeEmojis = map[string]string {
 };
 
 var ScrobbleTypeNames =  map[string]string {
-	"scrobble" : "🎧 Listen",
-	"tv" : "📺 TV Show",
+	// "scrobble" : "🎧 Listen",
+	// "tv" : "📺 TV Show",
 	"movie": "🎬 Movie",
-	"read": "📖 Read",
+	// "read": "📖 Read",
 };
 
 var ScrobbleTypeVerbs = map[string]string {

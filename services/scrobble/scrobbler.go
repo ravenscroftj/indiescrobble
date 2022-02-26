@@ -85,18 +85,23 @@ func (s *Scrobbler) BuildMicroPubPayload(post *models.Post) ([]byte, error) {
 
 	properties["summary"] = []string{s.GenerateSummary(post)}
 
-	citationProps := make(map[string]interface{})
-	citationProps["name"] = []string{post.MediaItem.DisplayName.String}
-	citationProps["uid"] = []string{post.MediaItem.MediaID}
-	citationProps["url"] = []string{post.MediaItem.CanonicalURL.String}
-	citationProps["indiescrobble-id"] = post.MediaItem.ID
+	// if the user has enabled it, add the citation e.g. read-of/watch-of/listen-of
+	if post.WithWatchOf {
+		citationProps := make(map[string]interface{})
+		citationProps["name"] = []string{post.MediaItem.DisplayName.String}
+		citationProps["uid"] = []string{post.MediaItem.MediaID}
+		citationProps["url"] = []string{post.MediaItem.CanonicalURL.String}
+		citationProps["indiescrobble-media-id"] = []string{ fmt.Sprintf("%v", post.MediaItem.ID) }
+	
+		citation := make(map[string]interface{})
+		citation["type"] = []string{"h-cite"}
+		citation["properties"] = citationProps
+	
+		// use the appropriate citation property e.g. read-of or watch-of
+		properties[ScrobbleCitationProperties[post.PostType]] = citation
+	}
 
-	citation := make(map[string]interface{})
-	citation["type"] = []string{"h-cite"}
-	citation["properties"] = citationProps
 
-	// use the appropriate citation property e.g. read-of or watch-of
-	properties[ScrobbleCitationProperties[post.PostType]] = citation
 
 	if post.Content.Valid {
 		properties["content"] = []string{post.Content.String}
@@ -108,11 +113,18 @@ func (s *Scrobbler) BuildMicroPubPayload(post *models.Post) ([]byte, error) {
 }
 
 func (s *Scrobbler) GenerateSummary(post *models.Post) string {
-	return fmt.Sprintf("%v %v %v and gave it %v/5",
+
+	rateString := ""
+
+	if post.Rating.Valid {
+		rateString = fmt.Sprintf(" and gave it %v/5", post.Rating.String)
+	}
+
+	return fmt.Sprintf("%v %v %v%v",
 		ScrobbleTypeEmojis[post.PostType],
 		ScrobbleTypeVerbs[post.PostType],
 		post.MediaItem.DisplayName.String,
-		post.Rating.String)
+		rateString)
 }
 
 func (s *Scrobbler) Preview(form *url.Values) (*models.Post, error) {
@@ -131,8 +143,10 @@ func (s *Scrobbler) Preview(form *url.Values) (*models.Post, error) {
 	post := models.Post{
 		MediaItem: item,
 		PostType:  form.Get("type"),
-		Content:   sql.NullString{String: form.Get("content"), Valid: true},
-		Rating:    sql.NullString{String: form.Get("rating"), Valid: true},
+		Content:   sql.NullString{String: form.Get("content"), Valid: form.Get("content") != ""},
+		Rating:    sql.NullString{String: form.Get("rating"), Valid: form.Get("rating") != "" },
+		WithWatchOf: form.Get("with_watch_of") == "1",
+		SharePost: form.Get("share_stats") == "1",
 	}
 
 	time, err := time.Parse(config.BROWSER_TIME_FORMAT, form.Get("when"))

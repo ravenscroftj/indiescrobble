@@ -17,4 +17,6 @@ type Post struct {
 	ScrobbledAt sql.NullTime
 	Content sql.NullString
 	Rating sql.NullString
+	SharePost bool
+	WithWatchOf bool
 }

@@ -19,6 +19,8 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 
 	iam := controllers.NewIndieAuthManager(db)
 
+	profile := controllers.NewUserProfileController(db)
+
 	router.GET("/health", health.Status)
 
 	router.Use(middlewares.AuthMiddleware(false, iam))
@@ -32,6 +34,9 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	router.POST("/indieauth", iam.IndieAuthLoginPost)
 	router.GET("/auth", iam.LoginCallbackGet)
 	router.GET("/logout", iam.Logout)
+
+	router.GET("/profile/config", profile.GetConfig)
+	router.POST("/profile/config", profile.SaveConfig)
 
 	authed := router.Use(middlewares.AuthMiddleware(true, iam))
 

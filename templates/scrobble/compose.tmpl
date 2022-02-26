@@ -25,12 +25,42 @@
 
     <div>
 
-    <label>When: </label> <input type="datetime-local" name='when' value="{{.now}}"/><br/>
+    <p>
+    <label>When: </label> <input type="datetime-local" name='when' value="{{.now}}"/>
+    </p>
 
-    <label>Rating: (out of 5)</label> <input type="number" name='rating'/><br/>
+    <p>
+    <label>Rating: (out of 5)</label> <input type="number" name='rating'/>
+    </p>
 
+    <p>
     <label>Note/Content: </label> <br>
     <textarea rows="6" name='content'></textarea>
+    </p>
+    
+    <label>
+    <input type="checkbox" name="share_stats" value="1" {{if .user.UserRecord.DefaultSharePost}}checked{{end}}/>
+    Share Scrobble with IndieScrobble Directory
+    <details>
+    <summary>What is this?</summary>
+    
+    <p>If you tick this box, your scrobble will be added to IndieScrobble Directory (coming soon) and counted towards public statistics. 
+    You can turn this off by default in <a href="/profile/config">your settings</a>
+    </p>
+    </details>
+    </label>
+
+    <label>
+    <input type="checkbox" name="with_watch_of" value="1" {{if .user.UserRecord.DefaultEnableWatchOf}}checked{{end}}/>
+    🧪 Enable experimental <i>watch-of</i> property in micropub post body
+    <details>
+    <summary>What is this?</summary>
+    <p>If you tick this box, the micropub payload sent to your site will also contain a watch-of property with metadata about the media item. 
+    You can read more about what this is <a target="_blank" href="https://github.com/ravenscroftj/indiescrobble/wiki/FAQs#what-is-watch-of-and-why-is-it-important">here</a> and you can turn this off by default in <a href="/profile/config">your settings</a>
+    </p>
+    </details>
+    </label>
+
 
     <br/>
     <button type="submit">Preview &gt; &gt;</button>

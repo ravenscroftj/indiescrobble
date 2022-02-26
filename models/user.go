@@ -26,8 +26,10 @@ type User struct {
 	gorm.Model
 	Me     string `gorm:"uniqueIndex"`
 	APIKey string
+	DefaultSharePost bool `gorm:"default:true"`
+	DefaultEnableWatchOf bool `gorm:"default:true"`
 }
 
 func (u *User) GenerateRandomKey() {
-	u.APIKey = randSeq(16)
+	u.APIKey = randSeq(32)
 }

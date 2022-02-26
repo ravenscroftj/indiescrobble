@@ -32,11 +32,17 @@
     <h4>Details</h4>
     <label>When: <b>{{.post.ScrobbledAt.Time}}</b></label> <input type="hidden" name="when" value="{{.when}}" /><br/>
 
+    {{ if .rating }}
+
     <label>Rating: (out of 5)</label> <b>{{.post.Rating.String}}</b> <input type="hidden" name="rating" value="{{.rating}}"/> <br/>
 
-    <label>Note/Content: </label> <br>
-    <blockquote>{{.post.Content.String}}</blockquote>
-    <input type="hidden" name="content" value="{{.post.Content.String}}"/>
+    {{end}}
+
+    {{if .post.Content.Valid }}
+        <label>Note/Content: </label> <br>
+        <blockquote>{{.post.Content.String}}</blockquote>
+        <input type="hidden" name="content" value="{{.post.Content.String}}"/>
+    {{end}}
 
     {{if .config.SyndicateTargets}}
         <h4>Syndication Options</h4>
