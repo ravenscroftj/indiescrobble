@@ -37,6 +37,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 
 	router.GET("/profile/config", profile.GetConfig)
 	router.POST("/profile/config", profile.SaveConfig)
+	router.GET("/profile", profile.ViewUserPosts)
 
 	authed := router.Use(middlewares.AuthMiddleware(true, iam))
 

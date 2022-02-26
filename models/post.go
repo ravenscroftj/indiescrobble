@@ -10,9 +10,9 @@ type Post struct {
 	gorm.Model
 	URL string `gorm:"uniqueIndex"`
 	PostType string `gorm:"index"`
-	UserID int `gorm:"foreignKey"`
+	UserID uint `gorm:"foreignKey"`
 	User User
-	MediaItemID int `gorm:"index"`
+	MediaItemID uint `gorm:"index"`
 	MediaItem MediaItem
 	ScrobbledAt sql.NullTime
 	Content sql.NullString

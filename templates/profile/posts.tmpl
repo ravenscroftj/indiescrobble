@@ -1,0 +1,30 @@
+{{ define "profile/posts.tmpl" }}
+<!DOCTYPE html>
+<html lang="en">
+	{{ template "partial/head.tmpl" . }}
+	<body>
+	{{ template "partial/header.tmpl" . }}
+	<main>
+
+	<h2>My Posts</h2>
+
+    <p>You have {{.count}} scrobbles associated with your account.</p>
+
+    <ul>
+    {{range .posts}}
+        <li><a href="/posts/{{.ID}}">{{.MediaItem.DisplayName.String}} - {{.CreatedAt.Format "02-01-2006 15:04:05" }}</a></li>
+    {{end}}
+    </ul>
+
+    {{if .prevLink}}
+        <a href="/profile?page={{.prevPage}}"><button>Previous</button></a>
+    {{end}}
+    {{if .nextLink}}
+        <a href="/profile?page={{.nextPage}}"><button>Next</button></a>
+    {{end}}
+
+	</main>
+	{{ template "footer.tmpl" . }}
+	</body>
+</html>
+{{end}}
