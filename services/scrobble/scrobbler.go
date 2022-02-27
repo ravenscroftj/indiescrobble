@@ -182,6 +182,8 @@ func (s *Scrobbler) Scrobble(form *url.Values, currentUser *models.BaseUser) (*m
 		PostType:  form.Get("type"),
 		Content:   sql.NullString{String: form.Get("content"), Valid: true},
 		Rating:    sql.NullString{String: form.Get("rating"), Valid: true},
+		WithWatchOf: form.Get("with_watch_of") == "1",
+		SharePost: form.Get("share_stats") == "1",
 	}
 
 	time, err := time.Parse(config.BROWSER_TIME_FORMAT, form.Get("when"))

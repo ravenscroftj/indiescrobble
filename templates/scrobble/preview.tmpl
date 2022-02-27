@@ -47,6 +47,8 @@
 
     </div>
     
+    <input type="hidden" name="with_watch_of" value="{{if .post.WithWatchOf}}1{{else}}0{{end}}" />
+    <input type="hidden" name="share_stats" value="{{if .post.SharePost}}1{{else}}0{{end}}" />
     <input type="hidden" name="item" value="{{.post.MediaItem.MediaID}}"/>
     <input type="hidden" name="when" value="{{.post.ScrobbledAt.Time}}" />
     <input type="hidden" name="rating" value="{{.post.Rating.String}}"/> 
