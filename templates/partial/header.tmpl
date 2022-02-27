@@ -11,14 +11,14 @@
 		<a href="https://github.com/ravenscroftj/indiescrobble/wiki/FAQs">About/FAQs</a>
 		{{ if .user }}
 		<a href="/scrobble/">Add a Scrobble</a>
-		<a href="">My Posts</a>
+		<a href="/profile/">My Posts</a>
 		<a href="/profile/config">My Settings</a>
 		{{else}}
 			<a href="/">Sign in via IndieAuth</a>
 		{{end}}
 	</nav>
 
-	{{ if .user.Me }}
+	{{ if .user }}
 	Logged in as {{.user.Me}} <a href="/logout"><button>Log Out</button></a>
     {{end}}
 

@@ -39,6 +39,10 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	router.POST("/profile/config", profile.SaveConfig)
 	router.GET("/profile", profile.ViewUserPosts)
 
+	postController := controllers.NewPostsController(db)
+
+	router.GET("/posts/:postID", postController.ViewPost)
+
 	authed := router.Use(middlewares.AuthMiddleware(true, iam))
 
 	// add scrobble endpoints
