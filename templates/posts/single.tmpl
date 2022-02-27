@@ -6,7 +6,15 @@
 	{{ template "partial/header.tmpl" . }}
 	<main>
 
-	<h2>Scrobble of {{.post.MediaItem.DisplayName.String}} on {{.CreatedAt.Format "02/01/2006" }}</h2>
+	<h2>Scrobble of {{.post.MediaItem.DisplayName.String}}</h2>
+
+    {{ if .post.URL }}
+
+	<h4>Canonical URL</h4>
+
+    <a href="{{.post.URL}}" target="_blank">{{.post.URL}}</a> <br/>
+
+    {{end}}
 
     {{ template "partial/postbody.tmpl" . }}
 
