@@ -47,7 +47,7 @@ func NewIMDBProvider(db *gorm.DB) *IMDBScrobbleMetadataProvider {
 
 func (i *IMDBScrobbleMetadataProvider) GetName() string { return "IMDB" }
 
-func titleFromMediaItem(mediaItem *models.MediaItem) imdb.Title {
+func imdbTitleFromMediaItem(mediaItem *models.MediaItem) imdb.Title {
 	title := imdb.Title{ID: mediaItem.MediaID}
 	return title
 }

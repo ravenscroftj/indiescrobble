@@ -38,7 +38,11 @@ func (s *Scrobbler) GetItemByID(form *url.Values) (ScrobbleMetaRecord, error) {
 		return nil, err
 	}
 
-	searchEngine := NewSearchProvider(form.Get("type"), s.db)
+	searchEngine, err := NewSearchProvider(form.Get("type"), s.db)
+
+	if err != nil {
+		return nil, err
+	}
 
 	item, err := searchEngine.SearchProvider.GetItem(form.Get("item"))
 
@@ -56,7 +60,11 @@ func (s *Scrobbler) Search(form *url.Values) ([]ScrobbleMetaRecord, error) {
 		return nil, err
 	}
 
-	searchEngine := NewSearchProvider(form.Get("type"), s.db)
+	searchEngine, err := NewSearchProvider(form.Get("type"), s.db)
+
+	if err != nil {
+		return nil, err
+	}
 
 	query := form.Get("q")
 
@@ -65,7 +73,15 @@ func (s *Scrobbler) Search(form *url.Values) ([]ScrobbleMetaRecord, error) {
 }
 
 func (s *Scrobbler) GetSearchEngineNameForType(scrobbleType string) string {
-	return NewSearchProvider(scrobbleType, s.db).SearchProvider.GetName()
+
+	searchEngine, err := NewSearchProvider(scrobbleType, s.db)
+
+	if err != nil {
+		return ""
+	} else {
+		return searchEngine.SearchProvider.GetName()
+	}
+
 }
 
 func (s *Scrobbler) BuildMicroPubPayload(post *models.Post) ([]byte, error) {
@@ -91,17 +107,15 @@ func (s *Scrobbler) BuildMicroPubPayload(post *models.Post) ([]byte, error) {
 		citationProps["name"] = []string{post.MediaItem.DisplayName.String}
 		citationProps["uid"] = []string{post.MediaItem.MediaID}
 		citationProps["url"] = []string{post.MediaItem.CanonicalURL.String}
-		citationProps["indiescrobble-media-id"] = []string{ fmt.Sprintf("%v", post.MediaItem.ID) }
-	
+		citationProps["indiescrobble-media-id"] = []string{fmt.Sprintf("%v", post.MediaItem.ID)}
+
 		citation := make(map[string]interface{})
 		citation["type"] = []string{"h-cite"}
 		citation["properties"] = citationProps
-	
+
 		// use the appropriate citation property e.g. read-of or watch-of
 		properties[ScrobbleCitationProperties[post.PostType]] = citation
 	}
-
-
 
 	if post.Content.Valid {
 		properties["content"] = []string{post.Content.String}
@@ -141,12 +155,12 @@ func (s *Scrobbler) Preview(form *url.Values) (*models.Post, error) {
 	}
 
 	post := models.Post{
-		MediaItem: item,
-		PostType:  form.Get("type"),
-		Content:   sql.NullString{String: form.Get("content"), Valid: form.Get("content") != ""},
-		Rating:    sql.NullString{String: form.Get("rating"), Valid: form.Get("rating") != "" },
+		MediaItem:   item,
+		PostType:    form.Get("type"),
+		Content:     sql.NullString{String: form.Get("content"), Valid: form.Get("content") != ""},
+		Rating:      sql.NullString{String: form.Get("rating"), Valid: form.Get("rating") != ""},
 		WithWatchOf: form.Get("with_watch_of") == "1",
-		SharePost: form.Get("share_stats") == "1",
+		SharePost:   form.Get("share_stats") == "1",
 	}
 
 	time, err := time.Parse(config.BROWSER_TIME_FORMAT, form.Get("when"))
@@ -177,13 +191,13 @@ func (s *Scrobbler) Scrobble(form *url.Values, currentUser *models.BaseUser) (*m
 	discovery := micropub.MicropubDiscoveryService{}
 
 	post := models.Post{
-		MediaItem: item,
-		User:      *currentUser.UserRecord,
-		PostType:  form.Get("type"),
-		Content:   sql.NullString{String: form.Get("content"), Valid: true},
-		Rating:    sql.NullString{String: form.Get("rating"), Valid: true},
+		MediaItem:   item,
+		User:        *currentUser.UserRecord,
+		PostType:    form.Get("type"),
+		Content:     sql.NullString{String: form.Get("content"), Valid: true},
+		Rating:      sql.NullString{String: form.Get("rating"), Valid: true},
 		WithWatchOf: form.Get("with_watch_of") == "1",
-		SharePost: form.Get("share_stats") == "1",
+		SharePost:   form.Get("share_stats") == "1",
 	}
 
 	time, err := time.Parse(config.BROWSER_TIME_FORMAT, form.Get("when"))
