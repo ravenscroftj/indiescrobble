@@ -1,0 +1,20 @@
+HTTP/2.0 200 OK
+Access-Control-Allow-Methods: GET, HEAD, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: ETag, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After, Content-Length, Content-Range
+Cache-Control: public, max-age=28800
+Content-Type: application/json;charset=utf-8
+Date: Sun, 06 Mar 2022 17:13:48 GMT
+Etag: W/"7f5f36afaf3bec46e6205d119e036316"
+Server: openresty
+Vary: Accept-Encoding
+Via: 1.1 0bc5d0934ecfdccaa70bff2ed15f447a.cloudfront.net (CloudFront)
+X-Amz-Cf-Id: fs4LjguX7pgUtsrXkb5qhps9mOm_V7RSLNyv37IsNowtpIfmshNT3A==
+X-Amz-Cf-Pop: LHR50-C1
+X-Cache: Miss from cloudfront
+X-Memc: HIT
+X-Memc-Age: 3754
+X-Memc-Expires: 11691
+X-Memc-Key: 59b94bacf3cc9249e15a4a3155299ce0dd356bf3
+
+{"adult":false,"backdrop_path":null,"belongs_to_collection":null,"budget":0,"genres":[{"id":99,"name":"Documentary"}],"homepage":"","id":690848,"imdb_id":"tt12004838","original_language":"en","original_title":"Best Wishes, Warmest Regards: A Schitt's Creek Farewell","overview":"Interviews with the cast, creators, journalists and celebrity fans, plus behind-the-scenes footage from season six.","popularity":3.383,"poster_path":"/bRTCcilyoZlVuGlp8HqLC8xsB2W.jpg","production_companies":[{"id":12113,"logo_path":"/lwnLVleFG0sRAYBq5IObgN30r9F.png","name":"CBC","origin_country":"CA"},{"id":83574,"logo_path":null,"name":"Not A Real Company","origin_country":"CA"},{"id":91495,"logo_path":null,"name":"POP TV","origin_country":"SI"}],"production_countries":[{"iso_3166_1":"CA","name":"Canada"}],"release_date":"2020-04-07","revenue":0,"runtime":44,"spoken_languages":[{"english_name":"English","iso_639_1":"en","name":"English"}],"status":"Released","tagline":"","title":"Best Wishes, Warmest Regards: A Schitt's Creek Farewell","video":false,"vote_average":8.8,"vote_count":8}

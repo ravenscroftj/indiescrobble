@@ -14,9 +14,9 @@ func NewSearchProvider(scrobbleType string, db *gorm.DB) (*MetaSearchProvider, e
 	// 	provider.SearchProvider = NewIMDBProvider(db)
 	// }
 
-	if scrobbleType == SCROBBLE_TYPE_MOVIE {
+	if scrobbleType == SCROBBLE_TYPE_MOVIE || scrobbleType == SCROBBLE_TYPE_TV {
 		var err error
-		provider.SearchProvider, err = NewTMDBProvider(db)
+		provider.SearchProvider, err = NewTMDBProvider(db, scrobbleType)
 
 		if err != nil {
 			return nil, err

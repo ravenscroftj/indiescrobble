@@ -3,6 +3,7 @@ package scrobble
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -17,41 +18,103 @@ import (
 )
 
 type TMDBMetaRecord struct {
+	tv    *tmdb.TVDetails
 	movie *tmdb.MovieDetails
+	ep    *tmdb.TVEpisodeDetails
 }
 
 func (r *TMDBMetaRecord) GetCanonicalURL() string {
-	return r.movie.Homepage
+	if r.movie != nil {
+		return r.movie.Homepage
+	} else {
+		return r.tv.Homepage
+	}
+}
+
+func (r *TMDBMetaRecord) GetEpisodes() []ScrobbleMetaRecord {
+	if r.tv != nil {
+
+		results := make([]ScrobbleMetaRecord, len(r.tv.EpisodeGroups.Results))
+
+		for i, ep := range r.tv.EpisodeGroups.Results {
+
+			epID, err := strconv.ParseInt(ep.ID, 10, 64)
+
+			if err != nil {
+				panic(err)
+			}
+
+			results[i] = &TMDBMetaRecord{
+
+				ep: &tmdb.TVEpisodeDetails{
+					ID:       epID,
+					Name:     ep.Name,
+					Overview: ep.Description,
+				},
+			}
+
+		}
+
+		return results
+
+	} else {
+		return nil
+	}
+
 }
 
 func (r *TMDBMetaRecord) GetDisplayName() string {
 
-	myDate, err := time.Parse("2006-01-02", r.movie.ReleaseDate)
+	if r.movie != nil {
+		myDate, err := time.Parse("2006-01-02", r.movie.ReleaseDate)
 
-	if err != nil {
-		fmt.Printf("Error: %v", err)
-		return r.movie.Title
+		if err != nil {
+			fmt.Printf("Error: %v", err)
+			return r.movie.Title
 
+		} else {
+			return fmt.Sprintf("%v (%v)", r.movie.Title, myDate.Format("2006"))
+		}
 	} else {
-		return fmt.Sprintf("%v (%v)", r.movie.Title, myDate.Format("2006"))
+		myDate, err := time.Parse("2006-01-02", r.tv.FirstAirDate)
+
+		if err != nil {
+			fmt.Printf("Error: %v", err)
+			return r.tv.Name
+
+		} else {
+			return fmt.Sprintf("%v (%v)", r.tv.Name, myDate.Format("2006"))
+		}
 	}
 
 }
 
 func (r *TMDBMetaRecord) GetID() string {
-	return strconv.FormatInt(r.movie.ID, 10)
+
+	if r.movie != nil {
+		return strconv.FormatInt(r.movie.ID, 10)
+	} else {
+		return strconv.FormatInt(r.tv.ID, 10)
+	}
+
 }
 
 func (r *TMDBMetaRecord) GetThumbnailURL() string {
-	return tmdb.GetImageURL(r.movie.PosterPath, tmdb.W500)
+	if r.movie != nil {
+		return tmdb.GetImageURL(r.movie.PosterPath, tmdb.W500)
+	} else {
+		return tmdb.GetImageURL(r.tv.BackdropPath, tmdb.W500)
+	}
+
 }
 
 type TMDBMetaDataProvider struct {
 	tmdbClient *tmdb.Client
 	db         *gorm.DB
+	mediaType  string
 }
 
-func NewTMDBProvider(db *gorm.DB) (*TMDBMetaDataProvider, error) {
+func NewTMDBProvider(db *gorm.DB, mediaType string) (*TMDBMetaDataProvider, error) {
 
 	tmdbClient, err := tmdb.Init(config.GetConfig().GetString("sources.tmdb.apiKey"))
 
@@ -63,34 +126,58 @@ func NewTMDBProvider(db *gorm.DB) (*TMDBMetaDataProvider, error) {
 		return nil, err
 	}
 
-	return &TMDBMetaDataProvider{tmdbClient: tmdbClient, db: db}, nil
+	return &TMDBMetaDataProvider{tmdbClient: tmdbClient, db: db, mediaType: mediaType}, nil
 }
 
 func (t *TMDBMetaDataProvider) GetName() string { return "TMDB" }
 
-func tmdbRecordFromMediaItem(mediaItem *models.MediaItem) TMDBMetaRecord {
+func tmdbRecordFromMediaItem(mediaItem *models.MediaItem, mediaType string) TMDBMetaRecord {
 	movie := &tmdb.MovieDetails{}
-	json.Unmarshal([]byte(mediaItem.Data.String), movie)
-	return TMDBMetaRecord{movie: movie}
+
+	if mediaType == SCROBBLE_TYPE_MOVIE {
+		json.Unmarshal([]byte(mediaItem.Data.String), movie)
+		return TMDBMetaRecord{movie: movie}
+	} else if mediaType == SCROBBLE_TYPE_TV {
+		json.Unmarshal([]byte(mediaItem.Data.String), movie)
+		return TMDBMetaRecord{movie: movie}
+	}
+
+	panic(errors.New("attempt to deserialize invalid media type"))
+
 }
 
-func tmdbRecordToMediaItem(record *TMDBMetaRecord) (*models.MediaItem, error) {
+func tmdbRecordToMediaItem(record *TMDBMetaRecord, mediaType string) (*models.MediaItem, error) {
 
-	marshalledTitle, err := json.Marshal(record.movie)
+	var item *models.MediaItem
 
-	if err != nil {
-		return nil, err
+	if mediaType == SCROBBLE_TYPE_MOVIE {
+		marshalledTitle, err := json.Marshal(record.movie)
+
+		if err != nil {
+			return nil, err
+		}
+
+		item = &models.MediaItem{
+			MediaID:      strconv.FormatInt(record.movie.ID, 10),
+			ThumbnailURL: sql.NullString{String: tmdb.GetImageURL(record.movie.PosterPath, tmdb.W500), Valid: true},
+			CanonicalURL: sql.NullString{String: record.movie.Homepage, Valid: true},
+			DisplayName:  sql.NullString{String: record.movie.Title, Valid: true},
+			Data:         sql.NullString{String: string(marshalledTitle), Valid: true},
+		}
+	} else if mediaType == SCROBBLE_TYPE_TV {
+		marshalledTitle, err := json.Marshal(record.tv)
+
+		if err != nil {
+			return nil, err
+		}
+
+		item = &models.MediaItem{
+			MediaID: strconv.FormatInt(record.tv.ID, 10),
+			Data:    sql.NullString{String: string(marshalledTitle), Valid: true},
+		}
 	}
 
-	item := models.MediaItem{
-		MediaID:      strconv.FormatInt(record.movie.ID, 10),
-		ThumbnailURL: sql.NullString{String: tmdb.GetImageURL(record.movie.PosterPath, tmdb.W500), Valid: true},
-		CanonicalURL: sql.NullString{String: record.movie.Homepage, Valid: true},
-		DisplayName:  sql.NullString{String: record.movie.Title, Valid: true},
-		Data:         sql.NullString{String: string(marshalledTitle), Valid: true},
-	}
-
-	return &item, nil
+	return item, nil
 }
 
 func (t *TMDBMetaDataProvider) GetItem(id string) (ScrobbleMetaRecord, error) {
@@ -101,7 +188,7 @@ func (t *TMDBMetaDataProvider) GetItem(id string) (ScrobbleMetaRecord, error) {
 	result := t.db.Where(&models.MediaItem{MediaID: id}).First(&item)
 
 	if result.Error == nil {
-		record := tmdbRecordFromMediaItem(&item)
+		record := tmdbRecordFromMediaItem(&item, t.mediaType)
 		return &record, nil
 	}
 
@@ -111,6 +198,50 @@ func (t *TMDBMetaDataProvider) GetItem(id string) (ScrobbleMetaRecord, error) {
 		return nil, err
 	}
 
+	if t.mediaType == SCROBBLE_TYPE_MOVIE {
+		record, err := t.createMovieRecord(tmdbId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return record, nil
+
+	} else if t.mediaType == SCROBBLE_TYPE_TV {
+		record, err := t.createTVShowRecord(tmdbId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return record, nil
+	}
+
+	return nil, fmt.Errorf("Invalid scrobble type provided: %v", t.mediaType)
+
+}
+
+func (t *TMDBMetaDataProvider) createTVShowRecord(tmdbId int) (*TMDBMetaRecord, error) {
+	title, err := t.tmdbClient.GetTVDetails(tmdbId, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// cache the title in db and store
+	record := TMDBMetaRecord{tv: title}
+	mediaItem, err := tmdbRecordToMediaItem(&record, t.mediaType)
+
+	result := t.db.Create(mediaItem)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &record, err
+}
+
+func (t *TMDBMetaDataProvider) createMovieRecord(tmdbId int) (*TMDBMetaRecord, error) {
 	title, err := t.tmdbClient.GetMovieDetails(tmdbId, nil)
 
 	if err != nil {
@@ -119,23 +250,58 @@ func (t *TMDBMetaDataProvider) GetItem(id string) (ScrobbleMetaRecord, error) {
 
 	// cache the title in db and store
 	record := TMDBMetaRecord{movie: title}
-	mediaItem, err := tmdbRecordToMediaItem(&record)
+	mediaItem, err := tmdbRecordToMediaItem(&record, t.mediaType)
 
-	result = t.db.Create(mediaItem)
+	result := t.db.Create(mediaItem)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
+	return &record, err
+}
+
+func (t *TMDBMetaDataProvider) Search(query string) ([]ScrobbleMetaRecord, error) {
+
+	if t.mediaType == SCROBBLE_TYPE_MOVIE {
+		return t.searchMovies(query)
+	} else if t.mediaType == SCROBBLE_TYPE_TV {
+		return t.searchTV(query)
+	}
+
+	panic(errors.New("Invalid scrobble type for search engine"))
+}
+
+func (t *TMDBMetaDataProvider) searchTV(query string) ([]ScrobbleMetaRecord, error) {
+
+	titles, err := t.tmdbClient.GetSearchTVShow(query, nil)
+
 	if err != nil {
 		return nil, err
 	}
 
-	return &record, nil
+	records := make([]ScrobbleMetaRecord, len(titles.Results))
 
+	for i, title := range titles.Results {
+		episode := tmdb.TVDetails{
+			ID:               title.ID,
+			VoteCount:        title.VoteCount,
+			PosterPath:       title.PosterPath,
+			BackdropPath:     title.BackdropPath,
+			Overview:         title.Overview,
+			OriginalLanguage: title.OriginalLanguage,
+			VoteAverage:      title.VoteAverage,
+			FirstAirDate:     title.FirstAirDate,
+			Name:             title.Name,
+		}
+
+		records[i] = &TMDBMetaRecord{tv: &episode}
+	}
+
+	return records, nil
 }
 
-func (t *TMDBMetaDataProvider) Search(query string) ([]ScrobbleMetaRecord, error) {
+func (t *TMDBMetaDataProvider) searchMovies(query string) ([]ScrobbleMetaRecord, error) {
 
 	titles, err := t.tmdbClient.GetSearchMovies(query, nil)
 

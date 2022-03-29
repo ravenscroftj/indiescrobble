@@ -5,3 +5,8 @@ server:
 jwt:
   signKey: "profiteroles"
   verifyKey: "topSecret"
+
+sources:
+
+  tmdb:
+    apiKey: e802faeea7be906500111c1c44411956

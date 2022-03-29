@@ -21,6 +21,10 @@ func (r *IMDBMetaRecord) GetID() string {
 	return r.title.ID
 }
 
+func (r *IMDBMetaRecord) GetEpisodes() []ScrobbleMetaRecord {
+	return nil
+}
+
 func (r *IMDBMetaRecord) GetDisplayName() string {
 	return fmt.Sprintf("%v (%v)", r.title.Name, r.title.Year)
 }
