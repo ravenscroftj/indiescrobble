@@ -121,6 +121,10 @@ func (s *Scrobbler) BuildMicroPubPayload(post *models.Post) ([]byte, error) {
 		properties["content"] = []string{post.Content.String}
 	}
 
+	if post.ScrobbledAt.Valid {
+		properties["published"] = []string{post.ScrobbledAt.Time.Format(time.RFC3339Nano)}
+	}
+
 	postObj["properties"] = properties
 
 	return json.MarshalIndent(postObj, "", "  ")
