@@ -11,10 +11,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-chi/jwtauth/v5"
-	"github.com/hacdias/indieauth"
 	"github.com/lestrrat-go/jwx/jwt"
 	"github.com/ravenscroftj/indiescrobble/config"
 	"github.com/ravenscroftj/indiescrobble/models"
+	"go.hacdias.com/indielib/indieauth"
 	"gorm.io/gorm"
 )
 
